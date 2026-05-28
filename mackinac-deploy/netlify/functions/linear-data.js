@@ -1,0 +1,273 @@
+const LINEAR_API = "https://api.linear.app/graphql";
+
+const CLIENT_PREFIX = {
+  mackinac: "[MAK]",
+  lifeinternational: "[LI]",
+  everraise: "[EVR]",
+};
+
+const handler = async (event) => {
+  const client = event.queryStringParameters?.client;
+
+  if (!client || !CLIENT_PREFIX[client]) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid or missing client param" }),
+    };
+  }
+
+  const apiKey = process.env.LINEAR_API_KEY;
+  if (!apiKey) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "LINEAR_API_KEY not configured" }),
+    };
+  }
+
+  const prefix = CLIENT_PREFIX[client];
+  const now = new Date();
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
+  const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+  // GraphQL query — date filters inlined as strings (Linear uses DateTimeOrDuration scalar)
+  const query = `
+    query ClientData($prefix: String!) {
+
+      # Issues currently in an active cycle for this client
+      cycleIssues: issues(
+        filter: {
+          project: { name: { startsWith: $prefix } }
+          cycle: { isActive: { eq: true } }
+          state: { type: { in: ["started", "unstarted"] } }
+        }
+        first: 50
+      ) {
+        nodes {
+          id
+          title
+          description
+          priority
+          state { name type }
+          labels { nodes { name } }
+          cycle { name startsAt endsAt }
+          project { name }
+        }
+      }
+
+      # Todo / In Progress issues (Now lane) — cycle issues deduped in JS
+      nowIssues: issues(
+        filter: {
+          project: { name: { startsWith: $prefix } }
+          state: { type: { in: ["started", "unstarted"] } }
+        }
+        first: 50
+      ) {
+        nodes {
+          id
+          title
+          description
+          priority
+          state { name type }
+          labels { nodes { name } }
+          project { name }
+        }
+      }
+
+      # Recent backlog ideas — Feature or Improvement label, created in last 30 days
+      ideaIssuesMonth: issues(
+        filter: {
+          title: { startsWith: $prefix }
+          state: { type: { eq: "backlog" } }
+          labels: { name: { in: ["Feature", "Improvement"] } }
+          createdAt: { gte: "${thirtyDaysAgo}" }
+        }
+        first: 50
+        orderBy: createdAt
+      ) {
+        nodes {
+          id
+          title
+          createdAt
+          state { name type }
+          cycle { name }
+          labels { nodes { name } }
+        }
+      }
+
+      # Subset — last 7 days for "this week" toggle
+      ideaIssuesWeek: issues(
+        filter: {
+          title: { startsWith: $prefix }
+          state: { type: { eq: "backlog" } }
+          labels: { name: { in: ["Feature", "Improvement"] } }
+          createdAt: { gte: "${sevenDaysAgo}" }
+        }
+        first: 20
+        orderBy: createdAt
+      ) {
+        nodes {
+          id
+          title
+          createdAt
+          state { name type }
+          cycle { name }
+          labels { nodes { name } }
+        }
+      }
+
+      # Stat: completed issues count
+      completedIssues: issues(
+        filter: {
+          title: { startsWith: $prefix }
+          state: { type: { eq: "completed" } }
+        }
+        first: 1
+      ) {
+        pageInfo { hasNextPage }
+        nodes { id }
+      }
+
+      # Most recently completed cycle (endsAt in the past)
+      lastCycle: cycles(
+        filter: {
+          endsAt: { lt: "${now.toISOString()}" }
+        }
+        first: 20
+      ) {
+        nodes {
+          name
+          number
+          startsAt
+          endsAt
+          issueCountHistory
+          issues(first: 50) {
+            nodes {
+              id
+              title
+              labels { nodes { name } }
+              project { name }
+            }
+          }
+        }
+      }
+
+    }
+  `;
+
+  try {
+    const response = await fetch(LINEAR_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: apiKey,
+      },
+      body: JSON.stringify({
+        query,
+        variables: { prefix },
+      }),
+    });
+
+    const json = await response.json();
+
+    if (json.errors) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Linear API error", details: json.errors }),
+      };
+    }
+
+    const d = json.data;
+    console.log(JSON.stringify(d.lastCycle?.nodes?.[0]?.issues?.nodes?.slice(0, 3), null, 2));
+
+    // Strip [PREFIX] from titles for client-facing display
+    const clean = (title) => title.replace(/^\[(?:MAK|LI|EVR)\]\s*/, "").trim();
+
+    // Map priority number to label
+    const priorityMap = { 0: "none", 1: "urgent", 2: "high", 3: "medium", 4: "low" };
+
+    // Map issue type from labels
+    const getType = (labels) => {
+      const names = labels.map((l) => l.name.toLowerCase());
+      if (names.includes("bug")) return "fix";
+      if (names.includes("feature")) return "feature";
+      if (names.includes("improvement")) return "improvement";
+      if (names.includes("integration")) return "integration";
+      return "feature";
+    };
+
+    const mapIssue = (issue) => ({
+      id: issue.id,
+      title: clean(issue.title),
+      description: issue.description?.split("\n")[0]?.slice(0, 120) || "",
+      priority: priorityMap[issue.priority] || "medium",
+      type: getType(issue.labels?.nodes || []),
+      status: issue.state?.name || "",
+      project: clean(issue.project?.name || ""),
+    });
+
+    const mapIdea = (issue) => ({
+      id: issue.id,
+      title: clean(issue.title),
+      createdAt: issue.createdAt,
+      status: issue.cycle ? "cycle" : "backlog",
+      label: issue.labels?.nodes?.[0]?.name || "Feature",
+    });
+
+    const matchesClientProject = (i) => i.project?.name?.startsWith(prefix);
+
+    // Dedupe: remove from Now any issues already in This Cycle
+    const cycleIssuesFiltered = d.cycleIssues.nodes.filter(matchesClientProject);
+    const cycleIds = new Set(cycleIssuesFiltered.map((i) => i.id));
+    const nowFiltered = d.nowIssues.nodes
+      .filter(matchesClientProject)
+      .filter((i) => !cycleIds.has(i.id));
+
+    // Map last cycle data
+    const lastCycleNode = (d.lastCycle?.nodes || [])
+      .sort((a, b) => new Date(b.endsAt) - new Date(a.endsAt))[0];
+    const lastCycleData = lastCycleNode ? [{
+      name: lastCycleNode.name,
+      number: lastCycleNode.number,
+      startsAt: lastCycleNode.startsAt,
+      endsAt: lastCycleNode.endsAt,
+      issueCountHistory: lastCycleNode.issueCountHistory,
+      issues: {
+        nodes: (lastCycleNode.issues?.nodes || []).filter((i) =>
+          i.project?.name?.startsWith(prefix)
+        ),
+      }
+    }] : [];
+
+    const result = {
+      cycle: cycleIssuesFiltered.map(mapIssue),
+      now: nowFiltered.map(mapIssue),
+      ideas: {
+        week: d.ideaIssuesWeek.nodes.map(mapIdea),
+        month: d.ideaIssuesMonth.nodes.map(mapIdea),
+      },
+      stats: {
+        inCycle: cycleIssuesFiltered.length,
+        inProgress: nowFiltered.length,
+        ideasThisMonth: d.ideaIssuesMonth.nodes.length,
+      },
+      lastCycle: lastCycleData,
+      lastSynced: new Date().toISOString(),
+    };
+
+    return {
+      statusCode: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store",
+      },
+      body: JSON.stringify(result),
+    };
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Fetch failed", details: err.message }),
+    };
+  }
+};
+
+module.exports = { handler };

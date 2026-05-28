@@ -1,0 +1,10 @@
+[build]
+  functions = "netlify/functions"
+  publish = "sites/admin"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
