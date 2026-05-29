@@ -38,7 +38,6 @@ const handler = async (event) => {
         filter: {
           project: { name: { startsWith: $prefix } }
           cycle: { isActive: { eq: true } }
-          state: { type: { in: ["started", "unstarted"] } }
         }
         first: 50
       ) {
@@ -216,6 +215,7 @@ const handler = async (event) => {
       type: getType(issue.labels?.nodes || []),
       status: issue.state?.name || "",
       project: clean(issue.project?.name || ""),
+      done: issue.state?.type === "completed",
     });
 
     const mapIdea = (issue) => ({

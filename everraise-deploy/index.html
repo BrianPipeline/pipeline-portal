@@ -88,6 +88,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
 .icard-title{font-size:14px;font-weight:500;color:var(--dark);margin-bottom:4px;line-height:1.35;}
 .icard-desc{font-size:12.5px;color:var(--muted);line-height:1.45;margin-bottom:7px;}
 .icard-foot{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+.icard-done{background:#F3FAF6;border-color:#C8E6D5;}
+.icard-done .icard-title{text-decoration:line-through;color:var(--muted);}
+.icard-top{display:flex;align-items:flex-start;gap:8px;margin-bottom:4px;}
+.icard-top .icard-title{flex:1;margin-bottom:0;line-height:1.35;}
+.icard-check{flex-shrink:0;color:var(--green);margin-top:1px;}
+.bdone{background:var(--green-light);color:var(--green);}
 .badge{font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;}
 .bf{background:var(--blue-light);color:var(--blue);}
 .bfix{background:var(--green-light);color:var(--green);}
@@ -344,9 +350,24 @@ function fmtDate(iso) {
 function cardHTML(item) {
   const [bc, bl] = BM[item.type] || BM.feature;
   const pc = PM[item.priority] || "dm";
+  const desc = item.description || item.desc || "";
+  if (item.done) {
+    return `<div class="icard icard-done">
+      <div class="icard-top">
+        <svg class="icard-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E7A4E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <div class="icard-title">${item.title}</div>
+        <span class="badge bdone">Done</span>
+      </div>
+      ${desc ? `<div class="icard-desc">${desc}</div>` : ""}
+      <div class="icard-foot">
+        <span class="badge ${bc}">${bl}</span>
+        <span class="pdot ${pc}"></span>
+      </div>
+    </div>`;
+  }
   return `<div class="icard">
     <div class="icard-title">${item.title}</div>
-    ${item.desc ? `<div class="icard-desc">${item.desc}</div>` : ""}
+    ${desc ? `<div class="icard-desc">${desc}</div>` : ""}
     <div class="icard-foot">
       <span class="badge ${bc}">${bl}</span>
       <span class="pdot ${pc}"></span>
