@@ -108,14 +108,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
 /* ERROR */
 .error-bar{background:#FFF3F3;border:0.5px solid #F7C1C1;border-radius:10px;padding:14px 18px;font-size:12.5px;color:#A32D2D;margin-bottom:24px;}
 
-
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-  .header,.hero,.stats-wrap,.body{padding-left:20px;padding-right:20px;}
-}
-
-  .stats-grid{grid-template-columns:repeat(2,1fr);}
-}
-
 /* ── MOBILE RESPONSIVE ───────────────────────────── */
 @media(max-width:768px){
   .header{padding:14px 16px;gap:8px;}
@@ -247,35 +239,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
     <div class="idea-list" id="idea-list"><div class="idea-empty">Loading...</div></div>
   </div>
 
-  <!-- LAST CYCLE PANEL -->
-  <div class="last-cycle">
-    <div class="lc-header">
-      <div class="lc-header-left">
-        <svg class="lc-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1E7A4E" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-        <div>
-          <div class="lc-title">Last Cycle — Completed Work</div>
-          <div class="lc-subtitle">Everything shipped in the previous sprint</div>
-        </div>
-      </div>
-      <div class="lc-meta">
-        <div class="lc-meta-cycle" id="lc-cycle-name">Loading...</div>
-        <div id="lc-cycle-dates"></div>
-      </div>
-    </div>
-    <div class="lc-progress-wrap">
-      <div class="lc-progress-bar-bg">
-        <div class="lc-progress-bar-fill" id="lc-progress-fill" style="width:0%"></div>
-      </div>
-      <div class="lc-progress-label" id="lc-progress-pct">—</div>
-      <div class="lc-count" id="lc-count"></div>
-    </div>
-    <div class="lc-items" id="lc-items"><div class="lc-empty">Loading...</div></div>
-  </div>
-
-  <!-- LANES -->
   <!-- LAST CYCLE PANEL -->
   <div class="last-cycle">
     <div class="lc-header">
@@ -454,20 +417,18 @@ function renderLastCycle(data) {
   document.getElementById('lc-progress-pct').textContent = pct + '%';
   document.getElementById('lc-count').textContent = `${completed} of ${total} issues`;
 
-  // Items
   const items = cycle.issues.nodes;
   if (!items.length) {
     document.getElementById('lc-items').innerHTML = '<div class="lc-empty">No completed items found for this cycle.</div>';
     return;
   }
-  const BM2 = { feature:['bf','Feature'], fix:['bfix','Fix'], improvement:['bi','Improvement'], integration:['bint','Integration'] };
   document.getElementById('lc-items').innerHTML = items.map(i => {
     const labels = i.labels?.nodes?.map(l => l.name.toLowerCase()) || [];
     let type = 'feature';
     if (labels.includes('bug')) type = 'fix';
     else if (labels.includes('improvement')) type = 'improvement';
     else if (labels.includes('integration')) type = 'integration';
-    const [bc, bl] = BM2[type];
+    const [bc, bl] = BM[type];
     const title = i.title.replace(/^\[(?:MAK|LI|EVR)\]\s*/, '').trim();
     return `<div class="lc-row">
       <svg class="lc-check" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1E7A4E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -501,6 +462,8 @@ async function loadData() {
     } else {
       document.getElementById("cycle-meta").textContent = "Active Sprint";
     }
+
+    renderLastCycle(data);
 
     // Lanes
     renderLane("lane-cycle", "cnt-cycle", data.cycle);
