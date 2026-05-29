@@ -423,11 +423,9 @@ function renderLastCycle(data) {
     document.getElementById('lc-cycle-dates').textContent = `${start} – ${end}`;
   }
 
-  // Progress
-  const completed = cycle.issues.nodes.length;
-  const history = cycle.issueCountHistory || [];
-  const total = history.length ? Math.max(...history) : completed;
-  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const completed = cycle.completedCount ?? 0;
+  const total = cycle.totalCount ?? 0;
+  const pct = cycle.percentage ?? 0;
   document.getElementById('lc-progress-fill').style.width = pct + '%';
   document.getElementById('lc-progress-pct').textContent = pct + '%';
   document.getElementById('lc-count').textContent = `${completed} of ${total} issues`;

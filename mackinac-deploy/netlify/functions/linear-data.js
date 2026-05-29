@@ -139,14 +139,27 @@ const handler = async (event) => {
           number
           startsAt
           endsAt
-          issueCountHistory
-          issues(first: 50) {
+          completedIssues: issues(
+            filter: {
+              project: { name: { startsWith: $prefix } }
+              state: { type: { eq: "completed" } }
+            }
+            first: 100
+          ) {
             nodes {
               id
               title
               labels { nodes { name } }
               project { name }
             }
+          }
+          totalIssues: issues(
+            filter: {
+              project: { name: { startsWith: $prefix } }
+            }
+            first: 100
+          ) {
+            nodes { id }
           }
         }
       }
@@ -177,7 +190,7 @@ const handler = async (event) => {
     }
 
     const d = json.data;
-    console.log(JSON.stringify(d.lastCycle?.nodes?.[0]?.issues?.nodes?.slice(0, 3), null, 2));
+    console.log(JSON.stringify(d.lastCycle?.nodes?.[0]?.completedIssues?.nodes?.slice(0, 3), null, 2));
 
     // Strip [PREFIX] from titles for client-facing display
     const clean = (title) => title.replace(/^\[(?:MAK|LI|EVR)\]\s*/, "").trim();
@@ -225,17 +238,22 @@ const handler = async (event) => {
     // Map last cycle data
     const lastCycleNode = (d.lastCycle?.nodes || [])
       .sort((a, b) => new Date(b.endsAt) - new Date(a.endsAt))[0];
+    const completedNodes = lastCycleNode?.completedIssues?.nodes || [];
+    const totalNodes = lastCycleNode?.totalIssues?.nodes || [];
+    const completedCount = completedNodes.length;
+    const totalCount = totalNodes.length;
+    const percentage =
+      totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
     const lastCycleData = lastCycleNode ? [{
       name: lastCycleNode.name,
       number: lastCycleNode.number,
       startsAt: lastCycleNode.startsAt,
       endsAt: lastCycleNode.endsAt,
-      issueCountHistory: lastCycleNode.issueCountHistory,
-      issues: {
-        nodes: (lastCycleNode.issues?.nodes || []).filter((i) =>
-          i.project?.name?.startsWith(prefix)
-        ),
-      }
+      completedCount,
+      totalCount,
+      percentage,
+      issues: { nodes: completedNodes },
     }] : [];
 
     const result = {
