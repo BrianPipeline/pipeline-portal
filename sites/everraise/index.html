@@ -328,6 +328,8 @@ const ROADMAP = {
 // ────────────────────────────────────────────────────────────────────────────
 
 const CLIENT = "everraise";
+let roadmapNext = ROADMAP.next;
+let roadmapLater = ROADMAP.later;
 let ideaData = { week: [], month: [] };
 let ideaMode = "week";
 
@@ -391,6 +393,19 @@ function setIdea(mode) {
   renderIdeas();
 }
 
+async function loadRoadmap() {
+  try {
+    const res = await fetch(`/.netlify/functions/slack-roadmap?client=${CLIENT}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    roadmapNext = Array.isArray(data.next) && data.next.length ? data.next : ROADMAP.next;
+    roadmapLater = Array.isArray(data.later) && data.later.length ? data.later : ROADMAP.later;
+  } catch {
+    roadmapNext = ROADMAP.next;
+    roadmapLater = ROADMAP.later;
+  }
+}
 
 function renderLastCycle(data) {
   const cycle = data.lastCycle?.[0];
@@ -442,6 +457,8 @@ async function loadData() {
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("spinning");
 
+  await loadRoadmap();
+
   try {
     const res = await fetch(`/.netlify/functions/linear-data?client=${CLIENT}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -468,8 +485,8 @@ async function loadData() {
     // Lanes
     renderLane("lane-cycle", "cnt-cycle", data.cycle);
     renderLane("lane-now", "cnt-now", data.now);
-    renderLane("lane-next", "cnt-next", ROADMAP.next);
-    renderLane("lane-later", "cnt-later", ROADMAP.later);
+    renderLane("lane-next", "cnt-next", roadmapNext);
+    renderLane("lane-later", "cnt-later", roadmapLater);
 
     // Ideas
     ideaData = data.ideas;
@@ -482,8 +499,8 @@ async function loadData() {
   } catch (err) {
     document.getElementById("error-wrap").innerHTML = `<div class="error-bar">Unable to load live data. Showing cached roadmap. <em>${err.message}</em></div>`;
     // Still render manual roadmap
-    renderLane("lane-next", "cnt-next", ROADMAP.next);
-    renderLane("lane-later", "cnt-later", ROADMAP.later);
+    renderLane("lane-next", "cnt-next", roadmapNext);
+    renderLane("lane-later", "cnt-later", roadmapLater);
     document.getElementById("update-note").innerHTML = `<strong>Latest from the team —</strong> ${ROADMAP.updateNote}`;
     document.getElementById("sync-time").textContent = "Could not sync";
   } finally {
@@ -491,7 +508,11 @@ async function loadData() {
   }
 }
 
-loadData();
+async function init() {
+  await loadData();
+}
+
+init();
 </script>
 </body>
 </html>
