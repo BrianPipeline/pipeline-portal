@@ -126,10 +126,10 @@ const handler = async (event) => {
         nodes { id }
       }
 
-      # Most recently completed cycle (endsAt in the past)
+      # Completed cycles in the last 30 days (pick first with client issues in JS)
       lastCycle: cycles(
         filter: {
-          endsAt: { lt: "${now.toISOString()}" }
+          endsAt: { gte: "${thirtyDaysAgo}", lte: "${now.toISOString()}" }
         }
         first: 20
       ) {
@@ -194,6 +194,18 @@ const handler = async (event) => {
     // Strip [PREFIX] from titles for client-facing display
     const clean = (title) => title.replace(/^\[(?:MAK|LI|EVR)\]\s*/, "").trim();
 
+    const firstDescriptionLine = (text) => {
+      if (!text) return "";
+      for (const line of text.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("##") || trimmed.startsWith("**")) {
+          continue;
+        }
+        return trimmed.slice(0, 120);
+      }
+      return "";
+    };
+
     // Map priority number to label
     const priorityMap = { 0: "none", 1: "urgent", 2: "high", 3: "medium", 4: "low" };
 
@@ -210,7 +222,7 @@ const handler = async (event) => {
     const mapIssue = (issue) => ({
       id: issue.id,
       title: clean(issue.title),
-      description: issue.description?.split("\n")[0]?.slice(0, 120) || "",
+      description: firstDescriptionLine(issue.description),
       priority: priorityMap[issue.priority] || "medium",
       type: getType(issue.labels?.nodes || []),
       status: issue.state?.name || "",
@@ -235,9 +247,11 @@ const handler = async (event) => {
       .filter(matchesClientProject)
       .filter((i) => !cycleIds.has(i.id));
 
-    // Map last cycle data
+    // Map last cycle: most recent ended cycle in last 30 days with client issues
     const lastCycleNode = (d.lastCycle?.nodes || [])
-      .sort((a, b) => new Date(b.endsAt) - new Date(a.endsAt))[0];
+      .sort((a, b) => new Date(b.endsAt) - new Date(a.endsAt))
+      .find((cycle) => (cycle.totalIssues?.nodes || []).length > 0);
+
     const completedNodes = lastCycleNode?.completedIssues?.nodes || [];
     const totalNodes = lastCycleNode?.totalIssues?.nodes || [];
     const completedCount = completedNodes.length;
