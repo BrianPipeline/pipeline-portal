@@ -74,7 +74,7 @@ const handler = async (event) => {
       # All backlog ideas for client prefix (newest first)
       ideaIssuesMonth: issues(
         filter: {
-          title: { startsWith: $prefix }
+          project: { name: { startsWith: $prefix } }
           state: { type: { eq: "backlog" } }
         }
         first: 100
@@ -92,7 +92,7 @@ const handler = async (event) => {
 
       ideaIssuesWeek: issues(
         filter: {
-          title: { startsWith: $prefix }
+          project: { name: { startsWith: $prefix } }
           state: { type: { eq: "backlog" } }
         }
         first: 100
