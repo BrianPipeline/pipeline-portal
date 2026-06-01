@@ -72,12 +72,11 @@ const handler = async (event) => {
         }
       }
 
-      # Recent backlog ideas — Feature or Improvement label, created in last 30 days
+      # Recent backlog ideas — all labels, created in last 30 days
       ideaIssuesMonth: issues(
         filter: {
           title: { startsWith: $prefix }
           state: { type: { eq: "backlog" } }
-          labels: { name: { in: ["Feature", "Improvement"] } }
           createdAt: { gte: "${thirtyDaysAgo}" }
         }
         first: 50
@@ -98,7 +97,6 @@ const handler = async (event) => {
         filter: {
           title: { startsWith: $prefix }
           state: { type: { eq: "backlog" } }
-          labels: { name: { in: ["Feature", "Improvement"] } }
           createdAt: { gte: "${sevenDaysAgo}" }
         }
         first: 20
