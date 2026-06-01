@@ -316,26 +316,36 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
 
 <script>
 const ROADMAP = {
+  now: [
+    { title: "Campaign Builder Polish", desc: "Fix workflow save/load, test call and Save Draft in ReviewLaunch, and add Contacts modal in CampaignDetail.", type: "improvement", priority: "high" },
+    { title: "Zapier Integration", desc: "Support flows for adding contacts, enrolling in campaigns, pushing opt-outs back to CRM, and exporting results.", type: "integration", priority: "high" },
+    { title: "Compliance & Launch Guardrails", desc: "Legal requirement before any paying customer goes live.", type: "feature", priority: "high" },
+    { title: "Basic Reporting", desc: "Campaign results view tracking dial-to-connect rates, conversations, voicemails, opt-outs, pledges, and total cost.", type: "feature", priority: "high" },
+    { title: "Customer Cost Controls", desc: "Usage visibility and monthly limits so orgs can predict costs and avoid billing surprises.", type: "feature", priority: "high" },
+    { title: "AI Voice Enhancements", desc: "Focused on voices that drive outcomes alongside latency optimization.", type: "improvement", priority: "medium" },
+    { title: "Webhooks", desc: "Native webhook support for pushing and pulling data without middleware.", type: "feature", priority: "medium" },
+    { title: "Multi-Campaign Support", desc: "Multiple active campaigns running concurrently with different AI scripts, knowledge bases, and voices.", type: "feature", priority: "medium" },
+  ],
   next: [
-    { title: "Campaign performance dashboard", desc: "Real-time view into campaign health, response rates, and revenue.", type: "feature", priority: "high" },
-    { title: "AI ask-amount recommendations", desc: "Personalized suggested ask amounts based on giving history.", type: "feature", priority: "high" },
-    { title: "Lapsed donor re-engagement flow", desc: "Automated sequence to win back donors who have gone quiet.", type: "improvement", priority: "medium" },
-    { title: "CRM integration — phase 1", desc: "Bidirectional sync with your existing donor management system.", type: "integration", priority: "medium" },
+    { title: "Priority Integration (Blackbaud)", desc: "Several prospects actively use Blackbaud. Could move up quickly based on early customer demand.", type: "integration", priority: "high" },
+    { title: "Single-Channel Quick Launch", desc: "Launch a focused voice, SMS, or email campaign in under 5 minutes without the multi-step builder.", type: "feature", priority: "high" },
+    { title: "Contact Enrichment", desc: "Updates phone numbers, wealth scoring, and date of birth via third-party API.", type: "feature", priority: "medium" },
+    { title: "AI Voice Surveys", desc: "New campaign type for donor feedback and volunteer availability.", type: "feature", priority: "medium" },
+    { title: "Light CRM", desc: "Contact records with tags, segments, notes, campaign history, and opt-out status.", type: "feature", priority: "medium" },
+    { title: "Navigation & UX Redesign", desc: "Phase 1 resolves open architectural questions, followed by Phase 2 buildout.", type: "improvement", priority: "medium" },
   ],
   later: [
-    { title: "Peer-to-peer fundraising tools", desc: "Empower supporters to fundraise on your behalf.", type: "feature", priority: "medium" },
-    { title: "Major gift pipeline view", desc: "Track high-value prospects through a visual pipeline.", type: "feature", priority: "medium" },
-    { title: "Predictive analytics layer", desc: "Forecast campaign outcomes before you launch.", type: "feature", priority: "low" },
-    { title: "Giving page personalization", desc: "Dynamic giving pages that adapt to each visitor.", type: "feature", priority: "low" },
-    { title: "Foundation grant matching AI", desc: "Surface relevant grant opportunities automatically.", type: "feature", priority: "low" },
+    { title: "Lob.com Direct Mail", desc: "Direct mail channel integration. Lower priority at this stage.", type: "integration", priority: "low" },
+    { title: "Predictive AI / Donor Scoring", desc: "Needs data volume before confidence is high enough to build well.", type: "feature", priority: "low" },
+    { title: "Meta / Google Ads Integration", desc: "High effort, confidence low until core campaign builder matures.", type: "integration", priority: "low" },
+    { title: "White Label / Multi-Org", desc: "Future business model play — low reach at current stage.", type: "feature", priority: "low" },
+    { title: "Social Media Integration", desc: "Low impact relative to effort at this stage.", type: "integration", priority: "low" },
   ],
-  updateNote: "Architecture is finalized and the data model is in place. Donor scoring model v1 begins this cycle — an exciting first milestone. We will share a preview once it is running.",
+  updateNote: "As early customers go live in June we are dedicating 30–50% of development capacity to stabilization and user feedback. Core priorities this cycle: Campaign Builder Polish and Zapier Integration.",
 };
 // ────────────────────────────────────────────────────────────────────────────
 
 const CLIENT = "everraise";
-let roadmapNext = ROADMAP.next;
-let roadmapLater = ROADMAP.later;
 let ideaData = { week: [], month: [] };
 let ideaMode = "week";
 
@@ -414,18 +424,11 @@ function setIdea(mode) {
   renderIdeas();
 }
 
-async function loadRoadmap() {
-  try {
-    const res = await fetch(`/.netlify/functions/slack-roadmap?client=${CLIENT}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    roadmapNext = Array.isArray(data.next) && data.next.length ? data.next : ROADMAP.next;
-    roadmapLater = Array.isArray(data.later) && data.later.length ? data.later : ROADMAP.later;
-  } catch {
-    roadmapNext = ROADMAP.next;
-    roadmapLater = ROADMAP.later;
-  }
+function renderManualLanes() {
+  document.getElementById("stat-now").textContent = ROADMAP.now.length;
+  renderLane("lane-now", "cnt-now", ROADMAP.now);
+  renderLane("lane-next", "cnt-next", ROADMAP.next);
+  renderLane("lane-later", "cnt-later", ROADMAP.later);
 }
 
 function renderLastCycle(data) {
@@ -477,8 +480,6 @@ async function loadData() {
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("spinning");
 
-  await loadRoadmap();
-
   try {
     const res = await fetch(`/.netlify/functions/linear-data?client=${CLIENT}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -486,7 +487,6 @@ async function loadData() {
 
     // Stats
     document.getElementById("stat-cycle").textContent = data.stats.inCycle;
-    document.getElementById("stat-now").textContent = data.stats.inProgress;
     document.getElementById("stat-ideas").textContent = data.stats.ideasThisMonth;
 
     // Sync time
@@ -502,11 +502,10 @@ async function loadData() {
 
     renderLastCycle(data);
 
+    renderManualLanes();
+
     // Lanes
     renderLane("lane-cycle", "cnt-cycle", data.cycle);
-    renderLane("lane-now", "cnt-now", data.now);
-    renderLane("lane-next", "cnt-next", roadmapNext);
-    renderLane("lane-later", "cnt-later", roadmapLater);
 
     // Ideas
     ideaData = data.ideas;
@@ -518,9 +517,7 @@ async function loadData() {
     document.getElementById("error-wrap").innerHTML = "";
   } catch (err) {
     document.getElementById("error-wrap").innerHTML = `<div class="error-bar">Unable to load live data. Showing cached roadmap. <em>${err.message}</em></div>`;
-    // Still render manual roadmap
-    renderLane("lane-next", "cnt-next", roadmapNext);
-    renderLane("lane-later", "cnt-later", roadmapLater);
+    renderManualLanes();
     document.getElementById("update-note").innerHTML = `<strong>Latest from the team —</strong> ${ROADMAP.updateNote}`;
     document.getElementById("sync-time").textContent = "Could not sync";
   } finally {

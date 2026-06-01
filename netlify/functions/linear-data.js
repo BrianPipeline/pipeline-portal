@@ -194,6 +194,18 @@ const handler = async (event) => {
     // Strip [PREFIX] from titles for client-facing display
     const clean = (title) => title.replace(/^\[(?:MAK|LI|EVR)\]\s*/, "").trim();
 
+    const firstDescriptionLine = (text) => {
+      if (!text) return "";
+      for (const line of text.split("\n")) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith("##") || trimmed.startsWith("**")) {
+          continue;
+        }
+        return trimmed.slice(0, 120);
+      }
+      return "";
+    };
+
     // Map priority number to label
     const priorityMap = { 0: "none", 1: "urgent", 2: "high", 3: "medium", 4: "low" };
 
@@ -210,7 +222,7 @@ const handler = async (event) => {
     const mapIssue = (issue) => ({
       id: issue.id,
       title: clean(issue.title),
-      description: issue.description?.split("\n")[0]?.slice(0, 120) || "",
+      description: firstDescriptionLine(issue.description),
       priority: priorityMap[issue.priority] || "medium",
       type: getType(issue.labels?.nodes || []),
       status: issue.state?.name || "",
