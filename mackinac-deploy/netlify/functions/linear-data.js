@@ -26,7 +26,6 @@ const handler = async (event) => {
 
   const prefix = CLIENT_PREFIX[client];
   const now = new Date();
-  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
   const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   // GraphQL query — date filters inlined as strings (Linear uses DateTimeOrDuration scalar)
@@ -72,14 +71,13 @@ const handler = async (event) => {
         }
       }
 
-      # Recent backlog ideas — all labels, created in last 30 days
+      # All backlog ideas for client prefix (newest first)
       ideaIssuesMonth: issues(
         filter: {
           title: { startsWith: $prefix }
           state: { type: { eq: "backlog" } }
-          createdAt: { gte: "${thirtyDaysAgo}" }
         }
-        first: 50
+        first: 100
         orderBy: createdAt
       ) {
         nodes {
@@ -92,14 +90,12 @@ const handler = async (event) => {
         }
       }
 
-      # Subset — last 7 days for "this week" toggle
       ideaIssuesWeek: issues(
         filter: {
           title: { startsWith: $prefix }
           state: { type: { eq: "backlog" } }
-          createdAt: { gte: "${sevenDaysAgo}" }
         }
-        first: 20
+        first: 100
         orderBy: createdAt
       ) {
         nodes {
@@ -257,6 +253,9 @@ const handler = async (event) => {
     const percentage =
       totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
+    const sortIdeasByCreatedDesc = (nodes) =>
+      [...nodes].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
     const lastCycleData = lastCycleNode ? [{
       name: lastCycleNode.name,
       number: lastCycleNode.number,
@@ -272,8 +271,8 @@ const handler = async (event) => {
       cycle: cycleIssuesFiltered.map(mapIssue),
       now: nowFiltered.map(mapIssue),
       ideas: {
-        week: d.ideaIssuesWeek.nodes.map(mapIdea),
-        month: d.ideaIssuesMonth.nodes.map(mapIdea),
+        week: sortIdeasByCreatedDesc(d.ideaIssuesWeek.nodes).map(mapIdea),
+        month: sortIdeasByCreatedDesc(d.ideaIssuesMonth.nodes).map(mapIdea),
       },
       stats: {
         inCycle: cycleIssuesFiltered.length,
