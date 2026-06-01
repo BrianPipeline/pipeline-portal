@@ -26,6 +26,7 @@ const handler = async (event) => {
 
   const prefix = CLIENT_PREFIX[client];
   const now = new Date();
+  const sevenDaysAgo = new Date(now - 7 * 24 * 60 * 60 * 1000).toISOString();
   const thirtyDaysAgo = new Date(now - 30 * 24 * 60 * 60 * 1000).toISOString();
 
   // GraphQL query — date filters inlined as strings (Linear uses DateTimeOrDuration scalar)
@@ -71,11 +72,12 @@ const handler = async (event) => {
         }
       }
 
-      # All backlog ideas for client prefix (newest first)
+      # Backlog ideas for client project — last 30 days (newest first)
       ideaIssuesMonth: issues(
         filter: {
           project: { name: { startsWith: $prefix } }
           state: { type: { eq: "backlog" } }
+          createdAt: { gte: "${thirtyDaysAgo}" }
         }
         first: 100
         orderBy: createdAt
@@ -90,10 +92,12 @@ const handler = async (event) => {
         }
       }
 
+      # Backlog ideas for client project — last 7 days (newest first)
       ideaIssuesWeek: issues(
         filter: {
           project: { name: { startsWith: $prefix } }
           state: { type: { eq: "backlog" } }
+          createdAt: { gte: "${sevenDaysAgo}" }
         }
         first: 100
         orderBy: createdAt
