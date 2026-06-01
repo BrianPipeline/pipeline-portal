@@ -312,24 +312,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
 // ─── MANUALLY CURATED ROADMAP ───────────────────────────────────────────────
 // Update these when your Slack roadmap shifts. Next/Later only.
 const ROADMAP = {
+  now: [
+    { title: "In-App Notifications & Project Sharing", desc: "Project sharing and internal notifications so users see when added to a project or when an agent completes a task.", type: "feature", priority: "high" },
+    { title: "Quality & Stability", desc: "Dedicated bandwidth to fix blocking errors on project creation, feedback submission UI, MCL mapping failures, and AI length constraints.", type: "fix", priority: "high" },
+    { title: "Chrome Extension Polish & Release", desc: "Getting the web capture tool completely over the line for public use with reliable scraping for all users.", type: "improvement", priority: "high" },
+    { title: "Citations & Source References", desc: "Replacing generic citation labels with author and year or article titles. All citations will be direct clickable URLs, PDFs, or document links.", type: "improvement", priority: "high" },
+    { title: "Persistent AI Context & Memory", desc: "Fixing the critical UX issue where the AI forgets tasks and documents once a user closes a project.", type: "improvement", priority: "high" },
+    { title: "Document Generation Pivot", desc: "Shifting AI focus from full articles to structured cited outlines, reverse engineered from Michael's template.", type: "feature", priority: "medium" },
+  ],
   next: [
-    { title: "Grant tracking module", desc: "Visibility into grant deadlines, amounts, and status.", type: "feature", priority: "medium" },
-    { title: "Calendar integration", desc: "Sync key donor touchpoints to your team calendar.", type: "integration", priority: "low" },
-    { title: "Recurring gift lapse alerts", desc: "Notify staff before a recurring gift drops off.", type: "improvement", priority: "medium" },
+    { title: "Resource Discovery & Previews", desc: "Moving discovered resources to the main panel with expandable previews so users can evaluate before adding to a project.", type: "feature", priority: "high" },
+    { title: "Chat Web Search & Date Parsing", desc: "Live internet browsing in the project chat assistant with publication dates displayed alongside results.", type: "feature", priority: "high" },
+    { title: "Advanced Archiving & Bulk Saving", desc: "Enhanced fallback logic for paywalled content and bulk saving of entire Public Acts or law chapters into a project.", type: "improvement", priority: "high" },
+    { title: "Zotero-style Hover Previews", desc: "Hover previews showing full highlight text inline within chat or document drafts, identical to Zotero popover behavior.", type: "feature", priority: "medium" },
+    { title: "Reading & Annotation Polish", desc: "Robust text highlighting in snapshots and PDFs, fixing highlight rendering in archived PDFs, sticky tooltips, and zoom.", type: "improvement", priority: "medium" },
+    { title: "Scheduled Background Monitoring", desc: "Recurring task scheduler to monitor policy keywords, auto-discover new resources, and draft summary briefs daily or weekly.", type: "feature", priority: "medium" },
+    { title: "Document Version History", desc: "Right-hand drawer history panel showing older draft versions, tracking changes, and allowing reversion to past sessions.", type: "feature", priority: "medium" },
   ],
   later: [
-    { title: "Mobile-optimized view", desc: "Responsive layouts for on-the-go access.", type: "improvement", priority: "low" },
-    { title: "Export to PDF / Excel", desc: "One-click export for reports and donor lists.", type: "feature", priority: "low" },
-    { title: "AI gift acknowledgment drafts", desc: "Draft personalized thank-you letters from donor history.", type: "feature", priority: "medium" },
-    { title: "Volunteer hour logging", desc: "Simple intake for tracking volunteer time.", type: "feature", priority: "low" },
+    { title: "Public Projects", desc: "Nice-to-have for advancement and comms but deferred until core archiving north star is achieved.", type: "feature", priority: "low" },
+    { title: "The Feed (Quorum Replacement)", desc: "Massive effort with unknowns. Paused until Cami delivers requirements doc and historical MIRS data export.", type: "feature", priority: "low" },
+    { title: "Excel, CSV & Chart Generation", desc: "High effort, requires defining Mackinac brand design guidelines first.", type: "feature", priority: "low" },
+    { title: "Deep Legal DB Integrations", desc: "Significant effort and high third-party API costs. Core needs to mature first.", type: "integration", priority: "low" },
+    { title: "Multi-user Collaborative Editing", desc: "High effort. Live concurrent editing is not the primary bottleneck right now.", type: "feature", priority: "low" },
   ],
-  updateNote: "We're in Cycle 3 and making strong progress. The automated report generation module is in final QA — you should see it in staging by end of week. No blockers.",
+  updateNote: "Our north star for the next 90 days: win on resource saving and precise clickable citations. Everything else supports those two things or waits. Chrome Extension Polish and Citations are the top priorities this cycle.",
 };
 // ────────────────────────────────────────────────────────────────────────────
 
 const CLIENT = "mackinac";
-let roadmapNext = ROADMAP.next;
-let roadmapLater = ROADMAP.later;
 let ideaData = { week: [], month: [] };
 let ideaMode = "week";
 
@@ -393,20 +404,12 @@ function setIdea(mode) {
   renderIdeas();
 }
 
-async function loadRoadmap() {
-  try {
-    const res = await fetch(`/.netlify/functions/slack-roadmap?client=${CLIENT}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    roadmapNext = Array.isArray(data.next) && data.next.length ? data.next : ROADMAP.next;
-    roadmapLater = Array.isArray(data.later) && data.later.length ? data.later : ROADMAP.later;
-  } catch {
-    roadmapNext = ROADMAP.next;
-    roadmapLater = ROADMAP.later;
-  }
+function renderManualLanes() {
+  document.getElementById("stat-now").textContent = ROADMAP.now.length;
+  renderLane("lane-now", "cnt-now", ROADMAP.now);
+  renderLane("lane-next", "cnt-next", ROADMAP.next);
+  renderLane("lane-later", "cnt-later", ROADMAP.later);
 }
-
 
 function renderLastCycle(data) {
   const cycle = data.lastCycle?.[0];
@@ -456,8 +459,6 @@ async function loadData() {
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("spinning");
 
-  await loadRoadmap();
-
   try {
     const res = await fetch(`/.netlify/functions/linear-data?client=${CLIENT}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -465,7 +466,6 @@ async function loadData() {
 
     // Stats
     document.getElementById("stat-cycle").textContent = data.stats.inCycle;
-    document.getElementById("stat-now").textContent = data.stats.inProgress;
     document.getElementById("stat-ideas").textContent = data.stats.ideasThisMonth;
 
     // Sync time
@@ -481,11 +481,10 @@ async function loadData() {
 
     renderLastCycle(data);
 
+    renderManualLanes();
+
     // Lanes
     renderLane("lane-cycle", "cnt-cycle", data.cycle);
-    renderLane("lane-now", "cnt-now", data.now);
-    renderLane("lane-next", "cnt-next", roadmapNext);
-    renderLane("lane-later", "cnt-later", roadmapLater);
 
     // Ideas
     ideaData = data.ideas;
@@ -497,9 +496,7 @@ async function loadData() {
     document.getElementById("error-wrap").innerHTML = "";
   } catch (err) {
     document.getElementById("error-wrap").innerHTML = `<div class="error-bar">Unable to load live data. Showing cached roadmap. <em>${err.message}</em></div>`;
-    // Still render manual roadmap
-    renderLane("lane-next", "cnt-next", roadmapNext);
-    renderLane("lane-later", "cnt-later", roadmapLater);
+    renderManualLanes();
     document.getElementById("update-note").innerHTML = `<strong>Latest from the team —</strong> ${ROADMAP.updateNote}`;
     document.getElementById("sync-time").textContent = "Could not sync";
   } finally {

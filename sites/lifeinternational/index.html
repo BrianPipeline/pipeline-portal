@@ -310,24 +310,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
 
 <script>
 const ROADMAP = {
+  now: [
+    { title: "Language Dropdown Bug Fix", desc: "Stabilize the translation tool for non-English speakers so international users can navigate the app.", type: "fix", priority: "high" },
+    { title: "Apple Dev ID App Transfer", desc: "Move the app under Pipeline's developer ID to unblock future CI/CD deployments and remove maintenance burden from the Life International team.", type: "improvement", priority: "high" },
+    { title: "User Feedback Mechanism", desc: "Deploy a direct copy of the Mackinac feedback UI into Life International. Capturing early user insights before wider adoption.", type: "feature", priority: "high" },
+    { title: "Agnostic Postgres CRM Architecture", desc: "Build the 50k constituent database natively in Pipeline's backend as source of truth, unblocking the entire Local CRM build.", type: "feature", priority: "high" },
+  ],
   next: [
-    { title: "Field report summarization", desc: "AI condenses field updates into a standard leadership format.", type: "feature", priority: "high" },
-    { title: "Prayer request workflow", desc: "Capture, categorize, and route prayer requests to the right teams.", type: "feature", priority: "medium" },
-    { title: "Impact metrics dashboard", desc: "Lives served, regions active, and team output in one view.", type: "feature", priority: "medium" },
+    { title: "LI Academy Scoping & Requirements", desc: "Getting Zach, Dan, and Owen aligned on what certification requires before writing any code. Define the training architecture first.", type: "feature", priority: "medium" },
+    { title: "Local CRM Phase 1", desc: "Basic contact profiles, tagging, organizational hierarchy, and activity timelines for 50k leaders based on the new Postgres schema.", type: "feature", priority: "medium" },
   ],
   later: [
-    { title: "SMS communication channel", desc: "Reach volunteers in low-connectivity regions via SMS.", type: "integration", priority: "medium" },
-    { title: "Event coordination module", desc: "Manage large mobilization events from one interface.", type: "feature", priority: "low" },
-    { title: "Donor-to-impact linkage", desc: "Connect donor giving to specific field outcomes.", type: "feature", priority: "low" },
-    { title: "Real-time field status map", desc: "Visual map of active teams and regions.", type: "feature", priority: "medium" },
+    { title: "LI Academy Core Build", desc: "Pending the Zach/Dan/Owen scoping phase. Low confidence until requirements are defined.", type: "feature", priority: "low" },
+    { title: "WhatsApp & Push Messaging", desc: "Tabled. Needs the Phase 1 CRM foundation completed first.", type: "integration", priority: "low" },
+    { title: "In-App Donations", desc: "Tabled. Pending the Bloomerang vs. Stripe gateway decision.", type: "feature", priority: "low" },
   ],
-  updateNote: "The volunteer intake AI is live in staging and ready for your team to review. Translation Agent work begins this cycle — reach out if you have feedback on the staging build.",
+  updateNote: "Our north star for the next 90 days: establish the correct data architecture to support 50k+ international leaders. The Agnostic Postgres CRM is the critical unblocking piece — everything else builds on top of it.",
 };
 // ────────────────────────────────────────────────────────────────────────────
 
 const CLIENT = "lifeinternational";
-let roadmapNext = ROADMAP.next;
-let roadmapLater = ROADMAP.later;
 let ideaData = { week: [], month: [] };
 let ideaMode = "week";
 
@@ -391,18 +393,11 @@ function setIdea(mode) {
   renderIdeas();
 }
 
-async function loadRoadmap() {
-  try {
-    const res = await fetch(`/.netlify/functions/slack-roadmap?client=${CLIENT}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    roadmapNext = Array.isArray(data.next) && data.next.length ? data.next : ROADMAP.next;
-    roadmapLater = Array.isArray(data.later) && data.later.length ? data.later : ROADMAP.later;
-  } catch {
-    roadmapNext = ROADMAP.next;
-    roadmapLater = ROADMAP.later;
-  }
+function renderManualLanes() {
+  document.getElementById("stat-now").textContent = ROADMAP.now.length;
+  renderLane("lane-now", "cnt-now", ROADMAP.now);
+  renderLane("lane-next", "cnt-next", ROADMAP.next);
+  renderLane("lane-later", "cnt-later", ROADMAP.later);
 }
 
 function renderLastCycle(data) {
@@ -453,8 +448,6 @@ async function loadData() {
   const btn = document.getElementById("refresh-btn");
   btn.classList.add("spinning");
 
-  await loadRoadmap();
-
   try {
     const res = await fetch(`/.netlify/functions/linear-data?client=${CLIENT}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -462,7 +455,6 @@ async function loadData() {
 
     // Stats
     document.getElementById("stat-cycle").textContent = data.stats.inCycle;
-    document.getElementById("stat-now").textContent = data.stats.inProgress;
     document.getElementById("stat-ideas").textContent = data.stats.ideasThisMonth;
 
     // Sync time
@@ -478,11 +470,10 @@ async function loadData() {
 
     renderLastCycle(data);
 
+    renderManualLanes();
+
     // Lanes
     renderLane("lane-cycle", "cnt-cycle", data.cycle);
-    renderLane("lane-now", "cnt-now", data.now);
-    renderLane("lane-next", "cnt-next", roadmapNext);
-    renderLane("lane-later", "cnt-later", roadmapLater);
 
     // Ideas
     ideaData = data.ideas;
@@ -494,9 +485,7 @@ async function loadData() {
     document.getElementById("error-wrap").innerHTML = "";
   } catch (err) {
     document.getElementById("error-wrap").innerHTML = `<div class="error-bar">Unable to load live data. Showing cached roadmap. <em>${err.message}</em></div>`;
-    // Still render manual roadmap
-    renderLane("lane-next", "cnt-next", roadmapNext);
-    renderLane("lane-later", "cnt-later", roadmapLater);
+    renderManualLanes();
     document.getElementById("update-note").innerHTML = `<strong>Latest from the team —</strong> ${ROADMAP.updateNote}`;
     document.getElementById("sync-time").textContent = "Could not sync";
   } finally {
