@@ -187,6 +187,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
   .lc-items{padding:10px 12px;}
   .lc-name{font-size:13px;}
 }
+
+/* ── SEARCH ───────────────────────────────────────── */
+.search-wrap{position:relative;margin:0 0 18px;}
+.search-box{display:flex;align-items:center;gap:10px;background:var(--white);border:0.5px solid var(--border);border-radius:12px;padding:12px 12px;box-shadow:0 1px 0 rgba(0,0,0,.02);}
+.search-ico{color:var(--muted);flex:0 0 auto;}
+.search-input{flex:1;border:0;outline:0;font-size:14px;color:var(--dark);background:transparent;}
+.search-input::placeholder{color:color-mix(in srgb, var(--muted) 80%, transparent);}
+.search-clear{border:0;background:transparent;color:var(--muted);cursor:pointer;padding:6px;border-radius:8px;display:none;}
+.search-clear:hover{background:var(--surface);color:var(--dark);}
+.search-spin{width:14px;height:14px;border-radius:50%;border:2px solid color-mix(in srgb, var(--border) 90%, transparent);border-top-color:var(--green);display:none;animation:spin .8s linear infinite;}
+.search-panel{position:absolute;top:calc(100% + 8px);left:0;right:0;background:var(--white);border:0.5px solid var(--border);border-radius:12px;box-shadow:0 14px 40px rgba(0,0,0,.10);overflow:hidden;display:none;z-index:20;}
+.srow{padding:10px 12px;border-bottom:0.5px solid var(--border);cursor:pointer;}
+.srow:hover{background:var(--surface);}
+.srow-top{display:flex;align-items:center;gap:10px;}
+.srow-title{font-size:13.5px;font-weight:600;color:var(--dark);flex:1;line-height:1.25;}
+.srow-meta{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.srow-proj{font-size:11px;color:var(--muted);max-width:190px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.srow-date{font-size:11px;color:var(--muted);white-space:nowrap;}
+.srow-desc{margin-top:8px;font-size:12.5px;color:var(--muted);line-height:1.35;white-space:pre-wrap;display:none;}
+.srow.open .srow-desc{display:block;}
+.srow:last-child{border-bottom:0;}
+.sempty{padding:14px 12px;font-size:13px;color:var(--muted);}
+.bdone{background:rgba(30,122,78,.12);color:var(--green);}
+
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -224,6 +249,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--surface);color:var(--dark
 
 <div class="body">
   <div id="error-wrap"></div>
+
+  <div class="search-wrap" id="search-wrap">
+    <div class="search-box">
+      <svg class="search-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input class="search-input" id="issue-search" type="text" placeholder="Search issues in Linear…" autocomplete="off" />
+      <div class="search-spin" id="search-spin" aria-hidden="true"></div>
+      <button class="search-clear" id="search-clear" type="button" aria-label="Clear search">✕</button>
+    </div>
+    <div class="search-panel" id="search-panel"></div>
+  </div>
 
   <!-- IDEA BUCKET -->
   <div class="idea-bucket">
@@ -425,6 +463,142 @@ function setIdea(mode) {
   renderIdeas();
 }
 
+function debounce(fn, ms) {
+  let t;
+  return (...args) => {
+    clearTimeout(t);
+    t = setTimeout(() => fn(...args), ms);
+  };
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+}
+
+function fmtShortDate(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function statusBadge(stateType, stateName) {
+  const t = (stateType || "").toLowerCase();
+  if (t === "completed") return `<span class="badge bdone">Done</span>`;
+  if (t === "canceled") return `<span class="badge bfix" style="background:#2F343B;color:#fff">Canceled</span>`;
+  if (t === "started") return `<span class="badge bi">In Progress</span>`;
+  if (t === "unstarted") return `<span class="badge bf">Todo</span>`;
+  if (t === "backlog") return `<span class="badge bint">Backlog</span>`;
+  return `<span class="badge bf">${escapeHtml(stateName || "Active")}</span>`;
+}
+
+function setupSearch() {
+  const input = document.getElementById("issue-search");
+  const panel = document.getElementById("search-panel");
+  const clearBtn = document.getElementById("search-clear");
+  const spin = document.getElementById("search-spin");
+
+  if (!input || !panel || !clearBtn || !spin) return;
+
+  let lastReqId = 0;
+
+  const close = () => {
+    panel.style.display = "none";
+    panel.innerHTML = "";
+  };
+  const openPanel = () => {
+    panel.style.display = "block";
+  };
+
+  const renderResults = (items) => {
+    if (!items.length) {
+      panel.innerHTML = `<div class="sempty">No matches.</div>`;
+      openPanel();
+      return;
+    }
+    panel.innerHTML = items
+      .map((r) => {
+        const title = escapeHtml(r.title || "");
+        const project = escapeHtml(r.project?.name || "");
+        const stateType = r.state?.type || "";
+        const stateName = r.state?.name || "";
+        const date = fmtShortDate(r.createdAt);
+        const desc = escapeHtml(r.description || "");
+        return `<div class="srow" role="button" tabindex="0" data-id="${escapeHtml(r.id)}">
+          <div class="srow-top">
+            <div class="srow-title">${title}</div>
+            <div class="srow-meta">
+              <div class="srow-proj">${project}</div>
+              ${statusBadge(stateType, stateName)}
+              <div class="srow-date">${date}</div>
+            </div>
+          </div>
+          <div class="srow-desc">${desc || "<em>No description</em>"}</div>
+        </div>`;
+      })
+      .join("");
+    openPanel();
+  };
+
+  const doSearch = async () => {
+    const q = input.value.trim();
+    clearBtn.style.display = q ? "block" : "none";
+    if (q.length < 3) {
+      close();
+      return;
+    }
+
+    const reqId = ++lastReqId;
+    spin.style.display = "block";
+    try {
+      const res = await fetch(`/.netlify/functions/search-issues?client=${CLIENT}&q=${encodeURIComponent(q)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      if (reqId !== lastReqId) return;
+      renderResults(Array.isArray(data.results) ? data.results : []);
+    } catch (e) {
+      if (reqId !== lastReqId) return;
+      panel.innerHTML = `<div class="sempty">Search failed. ${escapeHtml(e.message || "")}</div>`;
+      openPanel();
+    } finally {
+      if (reqId === lastReqId) spin.style.display = "none";
+    }
+  };
+
+  const debounced = debounce(doSearch, 300);
+
+  input.addEventListener("input", debounced);
+  input.addEventListener("focus", () => {
+    if (panel.innerHTML) openPanel();
+  });
+  clearBtn.addEventListener("click", () => {
+    input.value = "";
+    clearBtn.style.display = "none";
+    close();
+    input.focus();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") close();
+  });
+  document.addEventListener("click", (e) => {
+    const wrap = document.getElementById("search-wrap");
+    if (!wrap) return;
+    if (!wrap.contains(e.target)) close();
+  });
+  panel.addEventListener("click", (e) => {
+    const row = e.target.closest(".srow");
+    if (!row) return;
+    row.classList.toggle("open");
+  });
+  panel.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" && e.key !== " ") return;
+    const row = e.target.closest(".srow");
+    if (!row) return;
+    e.preventDefault();
+    row.classList.toggle("open");
+  });
+}
+
 function renderManualLanes() {
   document.getElementById("stat-now").textContent = ROADMAP.now.length;
   renderLane("lane-now", "cnt-now", ROADMAP.now);
@@ -528,6 +702,7 @@ async function loadData() {
 
 async function init() {
   await loadData();
+  setupSearch();
 }
 
 init();
