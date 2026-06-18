@@ -319,6 +319,8 @@
   .q-item.checked .q-num { background: var(--green); }
   .q-item.checked .q-num .q-num-label { display: none; }
   .q-item.checked .q-num .q-check { display: flex; }
+  #sec-roles .q-item { cursor: default; }
+  #sec-roles .q-item:hover { border-color: var(--border); }
   .q-body { padding: 11px 14px; }
   .q-body strong { display: block; font-size: 13.5px; color: var(--navy); margin-bottom: 3px; }
   .q-body p { font-size: 12.5px; color: var(--gray-mid); line-height: 1.6; }
@@ -375,6 +377,7 @@
   <div class="toc">
     <div class="toc-item" onclick="openSection('overview')"><span class="toc-icon">📋</span> Overview & North Star</div>
     <div class="toc-item" onclick="openSection('architecture')"><span class="toc-icon">🏗️</span> Data Architecture</div>
+    <div class="toc-item" onclick="openSection('roles')"><span class="toc-icon">🔐</span> User Roles & Permissions</div>
     <div class="toc-item" onclick="openSection('constituent')"><span class="toc-icon">👤</span> Constituent Record</div>
     <div class="toc-item" onclick="openSection('org')"><span class="toc-icon">🏛️</span> Organization Record</div>
     <div class="toc-item" onclick="openSection('hubs')"><span class="toc-icon">🌍</span> Global Hubs</div>
@@ -483,6 +486,129 @@
         <span class="callout-icon">⚠️</span>
         <p><strong>Critical schema risk:</strong> <code>country_code</code> must be a required field at ingestion — not optional. Geographic reporting (hub assignment, donor drill-down by country) cannot be rebuilt retroactively if this is missing from imported records.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- User Roles & Permissions -->
+  <div class="section" id="sec-roles">
+    <div class="section-header" onclick="toggleSection('roles')">
+      <div class="section-icon" style="background:var(--red-bg);">🔐</div>
+      <h2>User Roles &amp; Permissions</h2>
+      <span class="badge" style="background:var(--red-bg);color:var(--red);">Needs Discovery</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="field-group">
+        <div class="field-group-title">Part 1 — Existing Role Schema (from codebase)</div>
+        <table style="margin-bottom:1rem;">
+          <thead><tr><th>Role</th><th>Code</th><th>Priority</th><th>Current Access</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Super Admin</strong></td>
+              <td><code>super_admin</code></td>
+              <td>3</td>
+              <td>Full system access, all users, all platform settings</td>
+            </tr>
+            <tr>
+              <td><strong>Admin</strong></td>
+              <td><code>admin</code></td>
+              <td>2</td>
+              <td>Platform-wide user and configuration management</td>
+            </tr>
+            <tr>
+              <td><strong>Editor</strong></td>
+              <td><code>editor</code></td>
+              <td>1</td>
+              <td>Content management — books, training modules, curriculum</td>
+            </tr>
+            <tr>
+              <td><strong>Reader</strong></td>
+              <td><code>reader</code></td>
+              <td>0</td>
+              <td>Default role. Consumes content, joins groups, participates in training</td>
+            </tr>
+            <tr>
+              <td><strong>Group Admin</strong></td>
+              <td><code>group_admin</code></td>
+              <td>Contextual</td>
+              <td>Scoped to a specific group via <code>group_admins</code> table. Manages members, invites, group events without platform-wide rights</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout-gold">
+          <span class="callout-icon">💡</span>
+          <p><strong>Trainer classification</strong> (Developing, Certified, Master Trainer) is intentionally NOT an AppRole — it is tracked as data on the certification record, not as a permission level. This is the correct architectural decision.</p>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Part 2 — Proposed New Roles for CRM Layer</div>
+        <table style="margin-bottom:1rem;">
+          <thead><tr><th>Proposed Role</th><th>Code</th><th>Access Level</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr>
+              <td><strong>Hub Manager</strong></td>
+              <td><code>hub_manager</code></td>
+              <td>Scoped read access to CRM data for their assigned hub only — constituent records, certification counts, training activity, hub dashboard. Cannot edit platform content or manage global users.</td>
+              <td>Mirrors the <code>group_admin</code> pattern — implemented via a <code>hub_managers</code> join table (<code>user_id</code> + <code>hub_id</code>). A user can be a Reader globally but Hub Manager for their region.</td>
+            </tr>
+            <tr>
+              <td><strong>CRM Admin</strong></td>
+              <td><code>crm_admin</code></td>
+              <td>Full CRM read/write across all hubs — constituent records, certifications, organizations, reports, donor KPI layer. Does not include platform settings or user role management.</td>
+              <td>For Zack, Owen, and key staff. Sits at priority level 2 alongside Admin but scoped to CRM rather than platform.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="callout callout-blue">
+          <span class="callout-icon">💡</span>
+          <p>The <code>hub_manager</code> role follows the same pattern as the existing <code>group_admin</code> — a join table scoping elevated rights to a specific entity. The <code>hub_managers</code> table needs: <code>user_id</code>, <code>hub_id</code>, <code>assigned_at</code>. One user can have multiple hub assignments if a Hub Chair coordinates across regions.</p>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <div class="field-group-title">Part 3 — Row-Level Security (RLS) Requirement</div>
+        <div class="callout callout-red">
+          <span class="callout-icon">⚠️</span>
+          <p><strong>BLOCKING SCHEMA ITEM:</strong> Every CRM table requires Postgres row-level security (RLS) policies before any data is exposed. <code>super_admin</code> and <code>admin</code> see all rows. <code>crm_admin</code> sees all CRM rows. <code>hub_manager</code> sees only rows where <code>country_code</code> matches their assigned hub's countries. <code>reader</code> sees only their own record. Without RLS policies in place, hub filtering is a UI trick only — not actual data security. RLS must be designed in Phase 1 alongside the schema, not added later.</p>
+        </div>
+      </div>
+
+      <div class="field-group" style="margin-bottom:0;">
+        <div class="field-group-title">Part 4 — Open Discovery Questions</div>
+        <div class="question-list">
+          <div class="q-item">
+            <div class="q-num"><span class="q-num-label">1</span></div>
+            <div class="q-body">
+              <strong>Hub officer access</strong>
+              <p>When a hub officer logs in, should they see all constituent records in their hub, or only people they have directly interacted with? Do any Hub Chairs need visibility across multiple hubs?</p>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num"><span class="q-num-label">2</span></div>
+            <div class="q-body">
+              <strong>CRM edit rights</strong>
+              <p>Should hub officers ever be able to update a constituent record (mark a certification, update a hub role)? Or is all CRM data entry strictly staff-only?</p>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num"><span class="q-num-label">3</span></div>
+            <div class="q-body">
+              <strong>Sensitive field visibility</strong>
+              <p>Security Level, private notes, and the Referred By field are clearly staff-only. Are there other fields hub leaders should never see even for people in their own hub?</p>
+            </div>
+          </div>
+          <div class="q-item">
+            <div class="q-num"><span class="q-num-label">4</span></div>
+            <div class="q-body">
+              <strong>Role assignment ownership</strong>
+              <p>Who on the Life International team assigns the <code>hub_manager</code> role to a hub officer? Is this a staff admin action only, or can existing hub chairs nominate new hub managers?</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1292,7 +1418,7 @@
     document.querySelectorAll('.action-item').forEach(item => {
       setActionChecked(item, false);
     });
-    document.querySelectorAll('.q-item').forEach(item => {
+    document.querySelectorAll('#sec-openq .q-item').forEach(item => {
       setOpenQChecked(item, false);
     });
   });
@@ -1326,14 +1452,14 @@
   }
 
   function restoreOpenQItems() {
-    document.querySelectorAll('.q-item').forEach(item => {
+    document.querySelectorAll('#sec-openq .q-item').forEach(item => {
       if (localStorage.getItem(openQStorageKey(item.dataset.index))) {
         setOpenQChecked(item, true);
       }
     });
   }
 
-  document.querySelectorAll('.q-item').forEach(item => {
+  document.querySelectorAll('#sec-openq .q-item').forEach(item => {
     item.addEventListener('click', () => toggleOpenQItem(item));
     item.addEventListener('keydown', e => {
       if (e.key === ' ' || e.key === 'Enter') {
