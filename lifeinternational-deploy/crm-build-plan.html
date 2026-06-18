@@ -205,11 +205,47 @@
   .callout-blue   { background: var(--blue-lt); border-left: 3px solid var(--blue); }
 
   /* ── Action items ── */
+  .action-list-header {
+    display: flex; justify-content: flex-end;
+    margin-bottom: 10px;
+  }
+  .action-reset {
+    font-size: 12px; color: var(--blue);
+    cursor: pointer; text-decoration: none;
+    border: none; background: none; padding: 0;
+    font-family: inherit;
+  }
+  .action-reset:hover { text-decoration: underline; }
+
   .action-list { display: grid; gap: 8px; }
   .action-item {
     display: flex; gap: 10px; align-items: flex-start;
     background: var(--gray-bg); border-radius: 8px;
     padding: 10px 14px;
+    cursor: pointer; user-select: none;
+    transition: opacity .2s;
+  }
+  .action-item:hover { background: #E8EDF5; }
+  .action-item.checked {
+    opacity: 0.5;
+  }
+  .action-item.checked .action-text {
+    text-decoration: line-through;
+  }
+  .action-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--white);
+    flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: transparent;
+    transition: background .15s, border-color .15s, color .15s;
+  }
+  .action-item.checked .action-check {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
   }
   .action-owner {
     font-size: 10px; font-weight: 700; text-transform: uppercase;
@@ -219,7 +255,7 @@
   .action-li    { background: var(--blue-lt); color: var(--blue); }
   .action-pipe  { background: var(--green-bg); color: var(--green); }
   .action-both  { background: var(--gold-bg); color: var(--gold); }
-  .action-item p { font-size: 13px; line-height: 1.6; }
+  .action-item p { font-size: 13px; line-height: 1.6; flex: 1; }
   .action-item p strong { color: var(--navy); }
 
   /* ── Two-col layout ── */
@@ -1089,54 +1125,69 @@
       <span class="chevron">▼</span>
     </div>
     <div class="section-body">
-      <div class="action-list">
-        <div class="action-item">
+      <div class="action-list-header">
+        <button type="button" class="action-reset" id="action-reset-all">Reset all</button>
+      </div>
+      <div class="action-list" id="action-list">
+        <div class="action-item" data-index="0" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Send <strong>country-to-hub mapping list</strong> (all 10 hubs + assigned countries) — blocking for hub auto-assignment build</p>
+          <p class="action-text">Send <strong>country-to-hub mapping list</strong> (all 10 hubs + assigned countries) — blocking for hub auto-assignment build</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="1" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Send <strong>Microsoft Forms template</strong> for September event — needed to map fields to CRM schema before the event</p>
+          <p class="action-text">Send <strong>Microsoft Forms template</strong> for September event — needed to map fields to CRM schema before the event</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="2" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Send <strong>mind map full export</strong> (all sections expanded as PDF)</p>
+          <p class="action-text">Send <strong>mind map full export</strong> (all sections expanded as PDF)</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="3" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Clarify <strong>Notes permission model</strong>: one field with toggle or two separate fields?</p>
+          <p class="action-text">Clarify <strong>Notes permission model</strong>: one field with toggle or two separate fields?</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="4" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Clarify <strong>Tags</strong>: do they tag a note/interaction record or the constituent record itself?</p>
+          <p class="action-text">Clarify <strong>Tags</strong>: do they tag a note/interaction record or the constituent record itself?</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="5" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Confirm <strong>Charlene's airport preference workflow</strong> — does a searchable IATA code typeahead work for her needs?</p>
+          <p class="action-text">Confirm <strong>Charlene's airport preference workflow</strong> — does a searchable IATA code typeahead work for her needs?</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="6" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-li">Owen / LI</span>
-          <p>Advise on <strong>app store transition</strong> timing — notify Brian when Apple approval comes through so Pipeline can coordinate pulling the old version</p>
+          <p class="action-text">Advise on <strong>app store transition</strong> timing — notify Brian when Apple approval comes through so Pipeline can coordinate pulling the old version</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="7" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-pipe">Pipeline / Brian</span>
-          <p>Share this build plan with <strong>Dan</strong> for UI/UX review — especially hub dashboard and constituent profile view</p>
+          <p class="action-text">Share this build plan with <strong>Dan</strong> for UI/UX review — especially hub dashboard and constituent profile view</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="8" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-pipe">Pipeline / Brian</span>
-          <p>Work with <strong>Ali</strong> to translate this field spec into a formal Postgres schema with data types, required flags, and permission levels</p>
+          <p class="action-text">Work with <strong>Ali</strong> to translate this field spec into a formal Postgres schema with data types, required flags, and permission levels</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="9" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-pipe">Pipeline / Brian</span>
-          <p>Flag <strong>address contextualization and city geocoding API</strong> as scope items for Dan — Phase 1 decision needed</p>
+          <p class="action-text">Flag <strong>address contextualization and city geocoding API</strong> as scope items for Dan — Phase 1 decision needed</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="10" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-pipe">Pipeline / Ali</span>
-          <p>Confirm <strong>Hub as standalone lookup table</strong> architecture before schema work begins</p>
+          <p class="action-text">Confirm <strong>Hub as standalone lookup table</strong> architecture before schema work begins</p>
         </div>
-        <div class="action-item">
+        <div class="action-item" data-index="11" role="checkbox" aria-checked="false" tabindex="0">
+          <span class="action-check" aria-hidden="true">✓</span>
           <span class="action-owner action-both">Both</span>
-          <p>Design the <strong>gift-to-impact relational key</strong> — even if donor integration is Phase 3, the foreign key must be built into the Phase 1 schema</p>
+          <p class="action-text">Design the <strong>gift-to-impact relational key</strong> — even if donor integration is Phase 3, the foreign key must be built into the Phase 1 schema</p>
         </div>
       </div>
     </div>
@@ -1165,6 +1216,66 @@
   // Open first section by default
   document.querySelector('#sec-overview .section-body').classList.add('open');
   document.querySelector('#sec-overview .section-header').classList.add('open');
+
+  // Action item checklist
+  const ACTION_STORAGE_KEY = 'li-crm-action-items';
+
+  function getActionStates() {
+    try {
+      return JSON.parse(localStorage.getItem(ACTION_STORAGE_KEY) || '{}');
+    } catch {
+      return {};
+    }
+  }
+
+  function saveActionState(index, checked) {
+    const states = getActionStates();
+    if (checked) {
+      states[index] = true;
+    } else {
+      delete states[index];
+    }
+    localStorage.setItem(ACTION_STORAGE_KEY, JSON.stringify(states));
+  }
+
+  function setActionChecked(item, checked) {
+    item.classList.toggle('checked', checked);
+    item.setAttribute('aria-checked', checked ? 'true' : 'false');
+    saveActionState(item.dataset.index, checked);
+  }
+
+  function toggleActionItem(item) {
+    setActionChecked(item, !item.classList.contains('checked'));
+  }
+
+  function restoreActionItems() {
+    const states = getActionStates();
+    document.querySelectorAll('.action-item').forEach(item => {
+      if (states[item.dataset.index]) {
+        setActionChecked(item, true);
+      }
+    });
+  }
+
+  document.querySelectorAll('.action-item').forEach(item => {
+    item.addEventListener('click', () => toggleActionItem(item));
+    item.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggleActionItem(item);
+      }
+    });
+  });
+
+  document.getElementById('action-reset-all').addEventListener('click', e => {
+    e.stopPropagation();
+    localStorage.removeItem(ACTION_STORAGE_KEY);
+    document.querySelectorAll('.action-item').forEach(item => {
+      setActionChecked(item, false);
+    });
+  });
+
+  restoreActionItems();
 </script>
 </body>
 </html>
