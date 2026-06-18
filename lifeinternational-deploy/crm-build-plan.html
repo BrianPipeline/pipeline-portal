@@ -292,14 +292,25 @@
   .q-item {
     display: flex; gap: 0;
     border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+    cursor: pointer; user-select: none;
+    transition: opacity .2s, border-color .15s;
   }
+  .q-item:hover { border-color: var(--blue-mid); }
+  .q-item.checked { opacity: 0.5; }
+  .q-item.checked .q-body strong,
+  .q-item.checked .q-body p { text-decoration: line-through; }
   .q-num {
     background: var(--blue); color: #fff;
     font-weight: 700; font-size: 13px;
     padding: 12px 14px; display: flex;
     align-items: center; justify-content: center;
     min-width: 42px; flex-shrink: 0;
+    transition: background .15s;
   }
+  .q-num .q-check { display: none; }
+  .q-item.checked .q-num { background: var(--green); }
+  .q-item.checked .q-num .q-num-label { display: none; }
+  .q-item.checked .q-num .q-check { display: flex; }
   .q-body { padding: 11px 14px; }
   .q-body strong { display: block; font-size: 13.5px; color: var(--navy); margin-bottom: 3px; }
   .q-body p { font-size: 12.5px; color: var(--gray-mid); line-height: 1.6; }
@@ -1056,57 +1067,57 @@
     </div>
     <div class="section-body">
       <div class="question-list">
-        <div class="q-item">
-          <div class="q-num">1</div>
+        <div class="q-item" data-index="0" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">1</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Hub lookup table architecture — confirm with Ali</strong>
             <p>Hub must be a standalone table (not just a field value) so country-to-hub remapping updates all records automatically. Verify this is Ali's approach before schema work starts.</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">2</div>
+        <div class="q-item" data-index="1" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">2</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Address contextualization — scope decision for Dan</strong>
             <p>Country-specific address structures (US needs state, other countries differ) and city autocomplete/geocoding API. What's the right approach and Phase 1 scope?</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">3</div>
+        <div class="q-item" data-index="2" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">3</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Notes permission model — for Owen</strong>
             <p>Private notes vs. admin-visible notes: one field with a visibility toggle, or two separate fields? Owen mentioned wanting this but didn't specify implementation preference.</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">4</div>
+        <div class="q-item" data-index="3" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">4</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Tags — interaction-level or constituent-level? — for Owen</strong>
             <p>Do Prayer/Care, Meeting, Personal Interaction, Ministry/Community tag an individual note/interaction record, or do they tag the constituent record itself? Different schema implications.</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">5</div>
+        <div class="q-item" data-index="4" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">5</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Microsoft Forms template for September — urgent</strong>
             <p>Need Owen to share the current Forms fields so we can map them to the schema before the event. This is a pre-event dependency, not a post-launch nice-to-have.</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">6</div>
+        <div class="q-item" data-index="5" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">6</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Country-to-hub mapping list — from Owen</strong>
             <p>All 10 hubs with their assigned countries. Required before hub auto-assignment logic can be built. Owen confirmed he'd send this.</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">7</div>
+        <div class="q-item" data-index="6" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">7</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>App store permissions — internal Pipeline</strong>
             <p>Apple and Google approval for new version through Pipeline's account could come end of next week. Old version needs to come down when new is approved. Who on the Pipeline side currently holds permissions for the existing listing?</p>
           </div>
         </div>
-        <div class="q-item">
-          <div class="q-num">8</div>
+        <div class="q-item" data-index="7" role="checkbox" aria-checked="false" tabindex="0">
+          <div class="q-num"><span class="q-num-label">8</span><span class="q-check" aria-hidden="true">✓</span></div>
           <div class="q-body">
             <strong>Gift-to-impact linkage design — for Dan</strong>
             <p>The donor attribution message ("your gift trained 12 leaders in Kenya") requires gift records and training records to share a relational key. Even if donor integration is Phase 3, the foreign key design decision needs to happen in Phase 1 schema work.</p>
@@ -1273,9 +1284,58 @@
     document.querySelectorAll('.action-item').forEach(item => {
       setActionChecked(item, false);
     });
+    document.querySelectorAll('.q-item').forEach(item => {
+      setOpenQChecked(item, false);
+    });
   });
 
   restoreActionItems();
+
+  // Open questions checklist
+  const OPENQ_STORAGE_PREFIX = 'openq-';
+
+  function openQStorageKey(index) {
+    return OPENQ_STORAGE_PREFIX + index;
+  }
+
+  function saveOpenQState(index, checked) {
+    const key = openQStorageKey(index);
+    if (checked) {
+      localStorage.setItem(key, 'true');
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
+  function setOpenQChecked(item, checked) {
+    item.classList.toggle('checked', checked);
+    item.setAttribute('aria-checked', checked ? 'true' : 'false');
+    saveOpenQState(item.dataset.index, checked);
+  }
+
+  function toggleOpenQItem(item) {
+    setOpenQChecked(item, !item.classList.contains('checked'));
+  }
+
+  function restoreOpenQItems() {
+    document.querySelectorAll('.q-item').forEach(item => {
+      if (localStorage.getItem(openQStorageKey(item.dataset.index))) {
+        setOpenQChecked(item, true);
+      }
+    });
+  }
+
+  document.querySelectorAll('.q-item').forEach(item => {
+    item.addEventListener('click', () => toggleOpenQItem(item));
+    item.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggleOpenQItem(item);
+      }
+    });
+  });
+
+  restoreOpenQItems();
 </script>
 </body>
 </html>
