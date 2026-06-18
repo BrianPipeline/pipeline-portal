@@ -147,6 +147,14 @@
     display: inline-block; font-size: 10px; font-weight: 700;
     padding: 2px 7px; border-radius: 4px; margin-right: 4px; margin-top: 2px;
   }
+  .record-badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 8px; border-radius: 10px;
+    margin-left: 6px; vertical-align: middle;
+    letter-spacing: .04em;
+  }
+  .record-badge-core { background: var(--navy); color: #fff; }
+  .record-badge-supporting { background: var(--gray-bg); color: var(--gray-mid); }
 
   /* ── Field spec cards ── */
   .field-group { margin-bottom: 1.5rem; }
@@ -425,7 +433,7 @@
   <div class="section" id="sec-architecture">
     <div class="section-header" onclick="toggleSection('architecture')">
       <div class="section-icon" style="background:var(--blue-lt);">🏗️</div>
-      <h2>Data Architecture — Three Core Record Types</h2>
+      <h2>Data Architecture — Three Core + Three Supporting Record Types</h2>
       <span class="badge" style="background:var(--blue-lt);color:var(--blue);">Schema</span>
       <span class="chevron">▼</span>
     </div>
@@ -434,37 +442,37 @@
         <thead><tr><th>Record Type</th><th>What It Represents</th><th>Key Relationships</th><th>Notes</th></tr></thead>
         <tbody>
           <tr>
-            <td><strong>Constituent</strong></td>
+            <td><strong>Constituent</strong> <span class="record-badge record-badge-core">Core</span></td>
             <td>Individual people — leaders, trainers, partners</td>
             <td>Belongs to Hub (via country), linked to Organizations, linked to certifications, linked to events</td>
             <td>Primary record type. Most fields here.</td>
           </tr>
           <tr>
-            <td><strong>Organization</strong></td>
+            <td><strong>Organization</strong> <span class="record-badge record-badge-core">Core</span></td>
             <td>Partner churches and life-giving ministries</td>
             <td>Belongs to Hub (via country), linked to Constituents as members/leaders</td>
             <td>First-class entity, not just a field on Constituent</td>
           </tr>
           <tr>
-            <td><strong>Hub</strong></td>
+            <td><strong>Hub</strong> <span class="record-badge record-badge-core">Core</span></td>
             <td>10 global hubs — lookup table driving auto-assignment</td>
             <td>Has many Constituents, has many Organizations — data derived not stored</td>
             <td><span style="color:var(--red);font-weight:600;">Must be its own table</span>, not just a field value</td>
           </tr>
           <tr>
-            <td><strong>Certification</strong></td>
+            <td><strong>Certification</strong> <span class="record-badge record-badge-supporting">Supporting</span></td>
             <td>Per-person, per-curriculum training status</td>
             <td>Belongs to Constituent, links to Curriculum, links to "Trained by" Constituent</td>
             <td>Composite key: person + curriculum</td>
           </tr>
           <tr>
-            <td><strong>Event</strong></td>
+            <td><strong>Event</strong> <span class="record-badge record-badge-supporting">Supporting</span></td>
             <td>Training events and general gatherings</td>
             <td>Belongs to Hub, linked to Facilitators (Constituents), has Registrants &amp; Attendance</td>
             <td>Two types: Training (curriculum-tagged) and Other</td>
           </tr>
           <tr>
-            <td><strong>Group</strong></td>
+            <td><strong>Group</strong> <span class="record-badge record-badge-supporting">Supporting</span></td>
             <td>Community discussion spaces</td>
             <td>Associated with Hub or global, auto-assigned from data or events</td>
             <td>Permission tiers for creation</td>
