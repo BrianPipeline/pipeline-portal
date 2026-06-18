@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LI CRM — Strategic Build Plan</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:       #1A3A5C;
+    --blue:       #2E6DA4;
+    --blue-lt:    #D6E8F7;
+    --blue-mid:   #4A8EC2;
+    --gold:       #C8860A;
+    --gold-bg:    #FFF8EC;
+    --gold-lt:    #FFE9B5;
+    --green:      #1E7145;
+    --green-bg:   #EAF4EE;
+    --green-lt:   #B8DFC8;
+    --purple:     #5B3FA0;
+    --purple-bg:  #F0ECFA;
+    --red:        #C0392B;
+    --red-bg:     #FDF0EF;
+    --gray-bg:    #F4F7FB;
+    --gray-lt:    #FAFBFD;
+    --gray-mid:   #666;
+    --gray-text:  #333;
+    --border:     #E0E6EF;
+    --white:      #fff;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #EEF2F8;
+    color: var(--gray-text);
+    line-height: 1.6;
+    padding: 2rem 1rem 4rem;
+  }
+
+  .page { max-width: 960px; margin: 0 auto; }
+
+  /* ── Header ── */
+  .doc-header {
+    background: var(--navy);
+    border-radius: 14px;
+    padding: 2rem 2.5rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+  }
+  .doc-header .eyebrow {
+    font-size: 11px; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--blue-mid); margin-bottom: 6px;
+  }
+  .doc-header h1 {
+    font-size: 30px; font-weight: 800;
+    color: #fff; line-height: 1.15;
+  }
+  .doc-header h1 span { color: var(--gold); }
+  .doc-header .meta {
+    text-align: right; font-size: 12px;
+    color: #8BA8C4; line-height: 1.8; flex-shrink: 0;
+  }
+
+  /* ── Section wrapper ── */
+  .section {
+    background: var(--white);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .section-header {
+    padding: 1rem 1.5rem;
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer; user-select: none;
+    border-bottom: 1px solid transparent;
+    transition: background .15s;
+  }
+  .section-header:hover { background: var(--gray-bg); }
+  .section-header.open { border-bottom-color: var(--border); }
+
+  .section-icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-size: 16px; font-weight: 700; color: var(--navy); flex: 1;
+  }
+  .section-header .badge {
+    font-size: 11px; font-weight: 600; padding: 3px 10px;
+    border-radius: 20px; flex-shrink: 0;
+  }
+  .section-header .chevron {
+    font-size: 12px; color: var(--gray-mid);
+    transition: transform .2s; flex-shrink: 0;
+  }
+  .section-header.open .chevron { transform: rotate(180deg); }
+
+  .section-body { padding: 1.5rem; display: none; }
+  .section-body.open { display: block; }
+
+  /* ── Phase banner ── */
+  .phase-banner {
+    border-radius: 10px; padding: 1rem 1.25rem;
+    display: flex; gap: 14px; align-items: flex-start;
+    margin-bottom: 1.25rem;
+  }
+  .phase-num {
+    font-size: 28px; font-weight: 800; line-height: 1;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .phase-banner h3 { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .phase-banner p  { font-size: 13px; line-height: 1.6; }
+
+  .phase-1 { background: var(--blue-lt); }
+  .phase-1 .phase-num { color: var(--blue); }
+  .phase-1 h3 { color: var(--navy); }
+
+  .phase-2 { background: var(--gold-bg); }
+  .phase-2 .phase-num { color: var(--gold); }
+  .phase-2 h3 { color: var(--navy); }
+
+  .phase-3 { background: var(--green-bg); }
+  .phase-3 .phase-num { color: var(--green); }
+  .phase-3 h3 { color: var(--navy); }
+
+  /* ── Tables ── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    background: var(--navy); color: #fff;
+    font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .08em;
+    padding: 9px 12px; text-align: left;
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--gray-lt); }
+  td strong { color: var(--navy); font-weight: 600; }
+  td .tag {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px; margin-right: 4px; margin-top: 2px;
+  }
+
+  /* ── Field spec cards ── */
+  .field-group { margin-bottom: 1.5rem; }
+  .field-group-title {
+    font-size: 11px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--gray-mid);
+    margin-bottom: 8px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 8px;
+  }
+  .field-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; background: var(--white);
+  }
+  .field-card .fname {
+    font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 3px;
+  }
+  .field-card .fmeta {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 5px;
+  }
+  .field-card .fpill {
+    font-size: 10px; font-weight: 600; padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .field-card .fnote { font-size: 11.5px; color: var(--gray-mid); line-height: 1.5; }
+
+  /* pill colors */
+  .pill-required  { background: #FDECEA; color: var(--red); }
+  .pill-optional  { background: var(--gray-bg); color: #555; }
+  .pill-staff     { background: #EEE8FA; color: var(--purple); }
+  .pill-user      { background: var(--blue-lt); color: var(--blue); }
+  .pill-auto      { background: var(--green-bg); color: var(--green); }
+  .pill-text      { background: #FFF3CD; color: #856404; }
+  .pill-select    { background: #D1ECF1; color: #0C5460; }
+  .pill-multi     { background: #D4EDDA; color: #155724; }
+  .pill-bool      { background: #F8D7DA; color: #721C24; }
+  .pill-link      { background: #E2D9F3; color: #4B2FAA; }
+  .pill-number    { background: #FFF3CD; color: #7D5A00; }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 8px; padding: .9rem 1.1rem;
+    display: flex; gap: 12px; margin-bottom: 1rem;
+    align-items: flex-start;
+  }
+  .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .callout p    { font-size: 13px; line-height: 1.65; }
+  .callout strong { font-weight: 700; }
+  .callout-gold   { background: var(--gold-bg); border-left: 3px solid var(--gold); }
+  .callout-red    { background: var(--red-bg);  border-left: 3px solid var(--red); }
+  .callout-green  { background: var(--green-bg);border-left: 3px solid var(--green); }
+  .callout-blue   { background: var(--blue-lt); border-left: 3px solid var(--blue); }
+
+  /* ── Action items ── */
+  .action-list { display: grid; gap: 8px; }
+  .action-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: var(--gray-bg); border-radius: 8px;
+    padding: 10px 14px;
+  }
+  .action-owner {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .08em; padding: 3px 8px; border-radius: 4px;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .action-li    { background: var(--blue-lt); color: var(--blue); }
+  .action-pipe  { background: var(--green-bg); color: var(--green); }
+  .action-both  { background: var(--gold-bg); color: var(--gold); }
+  .action-item p { font-size: 13px; line-height: 1.6; }
+  .action-item p strong { color: var(--navy); }
+
+  /* ── Two-col layout ── */
+  .two-col {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px; margin-bottom: 1rem;
+  }
+  .info-card {
+    background: var(--gray-bg); border-radius: 8px;
+    padding: 1rem 1.1rem;
+  }
+  .info-card h4 {
+    font-size: 12px; font-weight: 700; color: var(--navy);
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-bottom: 8px;
+  }
+  .info-card ul { padding-left: 1rem; }
+  .info-card li { font-size: 13px; line-height: 1.7; color: var(--gray-text); }
+
+  /* ── Hub grid ── */
+  .hub-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px; margin-bottom: 1rem;
+  }
+  .hub-card {
+    background: var(--navy); border-radius: 8px;
+    padding: 10px 12px; text-align: center;
+  }
+  .hub-card .hub-num { font-size: 20px; font-weight: 800; color: var(--gold); }
+  .hub-card .hub-name { font-size: 11px; color: #8BA8C4; margin-top: 3px; line-height: 1.4; }
+
+  /* ── Open questions ── */
+  .question-list { display: grid; gap: 8px; }
+  .q-item {
+    display: flex; gap: 0;
+    border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
+  }
+  .q-num {
+    background: var(--blue); color: #fff;
+    font-weight: 700; font-size: 13px;
+    padding: 12px 14px; display: flex;
+    align-items: center; justify-content: center;
+    min-width: 42px; flex-shrink: 0;
+  }
+  .q-body { padding: 11px 14px; }
+  .q-body strong { display: block; font-size: 13.5px; color: var(--navy); margin-bottom: 3px; }
+  .q-body p { font-size: 12.5px; color: var(--gray-mid); line-height: 1.6; }
+
+  /* ── Curriculum matrix ── */
+  .matrix-wrap { overflow-x: auto; }
+
+  /* ── TOC nav ── */
+  .toc {
+    background: var(--white); border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 6px;
+  }
+  .toc-item {
+    font-size: 13px; color: var(--blue);
+    padding: 6px 10px; border-radius: 6px;
+    cursor: pointer; transition: background .12s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .toc-item:hover { background: var(--blue-lt); }
+  .toc-item .toc-icon { font-size: 14px; }
+
+  @media (max-width: 600px) {
+    .doc-header { flex-direction: column; align-items: flex-start; }
+    .doc-header .meta { text-align: left; }
+    .two-col { grid-template-columns: 1fr; }
+    .hub-grid { grid-template-columns: repeat(2, 1fr); }
+    .field-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Header -->
+  <div class="doc-header">
+    <div>
+      <p class="eyebrow">Life International &middot; Pipeline.app</p>
+      <h1>Native CRM<br><span>Strategic Build Plan</span></h1>
+    </div>
+    <div class="meta">
+      Based on Owen Longjohn Discovery<br>
+      June 18, 2026<br>
+      Prepared by Brian McLaughlin<br>
+      Confidential
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-item" onclick="openSection('overview')"><span class="toc-icon">📋</span> Overview & North Star</div>
+    <div class="toc-item" onclick="openSection('architecture')"><span class="toc-icon">🏗️</span> Data Architecture</div>
+    <div class="toc-item" onclick="openSection('constituent')"><span class="toc-icon">👤</span> Constituent Record</div>
+    <div class="toc-item" onclick="openSection('org')"><span class="toc-icon">🏛️</span> Organization Record</div>
+    <div class="toc-item" onclick="openSection('hubs')"><span class="toc-icon">🌍</span> Global Hubs</div>
+    <div class="toc-item" onclick="openSection('certifications')"><span class="toc-icon">🏅</span> Certifications</div>
+    <div class="toc-item" onclick="openSection('events')"><span class="toc-icon">📅</span> Events & Registrations</div>
+    <div class="toc-item" onclick="openSection('groups')"><span class="toc-icon">💬</span> Groups</div>
+    <div class="toc-item" onclick="openSection('kpis')"><span class="toc-icon">📊</span> KPIs & Donor Story</div>
+    <div class="toc-item" onclick="openSection('phases')"><span class="toc-icon">🗺️</span> Phased Build Plan</div>
+    <div class="toc-item" onclick="openSection('openq')"><span class="toc-icon">❓</span> Open Questions</div>
+    <div class="toc-item" onclick="openSection('actions')"><span class="toc-icon">✅</span> Action Items</div>
+  </div>
+
+  <!-- 1. Overview -->
+  <div class="section" id="sec-overview">
+    <div class="section-header open" onclick="toggleSection('overview')">
+      <div class="section-icon" style="background:#EAF4EE;">📋</div>
+      <h2>Overview &amp; North Star</h2>
+      <span class="badge" style="background:var(--blue-lt);color:var(--blue);">Foundation</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body open">
+      <div class="two-col">
+        <div class="info-card">
+          <h4>The Challenge</h4>
+          <ul>
+            <li>16 staff stewarding 50,000+ leaders</li>
+            <li>170 countries, 10 global hubs</li>
+            <li>Legacy eTapestry not built for this</li>
+            <li>Data siloed across SharePoint docs</li>
+            <li>No live KPI visibility for donors</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h4>The Goal</h4>
+          <ul>
+            <li>Native Postgres CRM built for LI's reality</li>
+            <li>Automate digital relationship management</li>
+            <li>Track trainer lineage &amp; multiplication chain</li>
+            <li>Surface live donor-facing impact metrics</li>
+            <li>Empower 16 staff to manage at global scale</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout callout-gold">
+        <span class="callout-icon">🎯</span>
+        <p><strong>North Star:</strong> "Because of your gift, 12 leaders were certified in Kenya this spring." — Every schema decision, every field, every dashboard should be evaluated against whether it gets Life International closer to being able to send that message to a donor automatically.</p>
+      </div>
+      <div class="callout callout-blue">
+        <span class="callout-icon">💡</span>
+        <p><strong>Owen's framing:</strong> Hub structure is the multiplication strategy. Trainings are the bread and butter. Groups are the primary end-user value-add. The CRM underpins all three — most leaders won't even know they exist in it, but every meaningful interaction flows through it.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Architecture -->
+  <div class="section" id="sec-architecture">
+    <div class="section-header" onclick="toggleSection('architecture')">
+      <div class="section-icon" style="background:var(--blue-lt);">🏗️</div>
+      <h2>Data Architecture — Three Core Record Types</h2>
+      <span class="badge" style="background:var(--blue-lt);color:var(--blue);">Schema</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="margin-bottom:1rem;">
+        <thead><tr><th>Record Type</th><th>What It Represents</th><th>Key Relationships</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Constituent</strong></td>
+            <td>Individual people — leaders, trainers, partners</td>
+            <td>Belongs to Hub (via country), linked to Organizations, linked to certifications, linked to events</td>
+            <td>Primary record type. Most fields here.</td>
+          </tr>
+          <tr>
+            <td><strong>Organization</strong></td>
+            <td>Partner churches and life-giving ministries</td>
+            <td>Belongs to Hub (via country), linked to Constituents as members/leaders</td>
+            <td>First-class entity, not just a field on Constituent</td>
+          </tr>
+          <tr>
+            <td><strong>Hub</strong></td>
+            <td>10 global hubs — lookup table driving auto-assignment</td>
+            <td>Has many Constituents, has many Organizations — data derived not stored</td>
+            <td><span style="color:var(--red);font-weight:600;">Must be its own table</span>, not just a field value</td>
+          </tr>
+          <tr>
+            <td><strong>Certification</strong></td>
+            <td>Per-person, per-curriculum training status</td>
+            <td>Belongs to Constituent, links to Curriculum, links to "Trained by" Constituent</td>
+            <td>Composite key: person + curriculum</td>
+          </tr>
+          <tr>
+            <td><strong>Event</strong></td>
+            <td>Training events and general gatherings</td>
+            <td>Belongs to Hub, linked to Facilitators (Constituents), has Registrants &amp; Attendance</td>
+            <td>Two types: Training (curriculum-tagged) and Other</td>
+          </tr>
+          <tr>
+            <td><strong>Group</strong></td>
+            <td>Community discussion spaces</td>
+            <td>Associated with Hub or global, auto-assigned from data or events</td>
+            <td>Permission tiers for creation</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-red">
+        <span class="callout-icon">⚠️</span>
+        <p><strong>Critical schema risk:</strong> <code>country_code</code> must be a required field at ingestion — not optional. Geographic reporting (hub assignment, donor drill-down by country) cannot be rebuilt retroactively if this is missing from imported records.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Constituent Record -->
+  <div class="section" id="sec-constituent">
+    <div class="section-header" onclick="toggleSection('constituent')">
+      <div class="section-icon" style="background:#EEE8FA;">👤</div>
+      <h2>Constituent Record — Full Field Specification</h2>
+      <span class="badge" style="background:#EEE8FA;color:var(--purple);">Phase 1</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+
+      <div class="callout callout-blue" style="margin-bottom:1.25rem;">
+        <span class="callout-icon">🔒</span>
+        <p><strong>Permission boundary:</strong> Fields from Personal Info through Hub are viewable (but not editable) by end users. Everything from Hub Role downward is staff-only.</p>
+      </div>
+
+      <!-- Personal Info -->
+      <div class="field-group">
+        <div class="field-group-title">Personal Info — End User Visible</div>
+        <div class="field-grid">
+          <div class="field-card">
+            <div class="fname">First Name</div>
+            <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-text">Text</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Last Name</div>
+            <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-text">Text</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Preferred Name / Nickname</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Text</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Title / Prefix</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Select</span><span class="fpill pill-user">User</span></div>
+            <div class="fnote">Mr, Mrs, Ms, Miss, Reverend, Pastor, Doctor, Professor</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Phone Number</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Text</span><span class="fpill pill-user">User</span><span class="fpill pill-bool">+ WhatsApp checkbox</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Email Address</div>
+            <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-text">Text</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Communication Preference</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Select</span><span class="fpill pill-user">User</span></div>
+            <div class="fnote">Phone/Text, WhatsApp, Email</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Address</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Flexible</span><span class="fpill pill-user">User</span></div>
+            <div class="fnote">⚠️ Must contextualize by country — US needs state field. Needs geocoding API for reliability.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">City</div>
+            <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-text">Autocomplete</span><span class="fpill pill-user">User</span></div>
+            <div class="fnote">Typeahead/autocomplete for mapping features. Needs geocoding API integration.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Country</div>
+            <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-select">Dropdown</span><span class="fpill pill-auto">Auto-assigns Hub</span></div>
+            <div class="fnote">Drives hub auto-assignment. All countries dropdown.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Gender</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Select</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Birthday</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Date</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Marital Status</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Select</span><span class="fpill pill-user">User</span></div>
+            <div class="fnote">Single, Married, Engaged, Divorced, Widowed</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Marriage Anniversary</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Date</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Family Relationships</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-link">Linked Records</span><span class="fpill pill-user">User</span></div>
+            <div class="fnote">Link to other constituent records. Up to grandparents/grandkids. Relationship type label (spouse, child, parent, etc.)</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Public Bio</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Long Text</span><span class="fpill pill-user">User</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Brief Testimony</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Long Text</span><span class="fpill pill-user">User</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ministry Info -->
+      <div class="field-group">
+        <div class="field-group-title">Ministry Info — Partially User Visible</div>
+        <div class="field-grid">
+          <div class="field-card">
+            <div class="fname">Church Affiliation</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-link">Linked Org</span><span class="fpill pill-user">User Visible</span></div>
+            <div class="fnote">Select from Organization records typed "Church". Multi-select allowed.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Church Role</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Text</span><span class="fpill pill-bool">+ Pastor/Leader checkbox</span></div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Affiliated Organizations</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-link">Linked Org</span><span class="fpill pill-user">User Visible</span></div>
+            <div class="fnote">Select from Organization records typed "Ministry" or "Other". Multi-select allowed.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Org Role</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Text</span><span class="fpill pill-bool">+ Leader checkbox</span></div>
+          </div>
+          <div class="field-card" style="border-color:var(--auto);border-width:2px;">
+            <div class="fname">Hub</div>
+            <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-auto">Auto-assigned</span><span class="fpill pill-user">View Only</span></div>
+            <div class="fnote">Derived from country. User can see but not edit. 🔒 Staff-only fields begin below this line.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Staff Only -->
+      <div class="field-group">
+        <div class="field-group-title">Hub &amp; Ministry Roles — Staff Only</div>
+        <div class="field-grid">
+          <div class="field-card">
+            <div class="fname">Hub Role</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Single Select</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Hub Chair, Hub Liaison, Hub Administrator, Hub Prayer Coordinator, Hub Leader, Hub Member, Hub Contact, New Contact. ONE role at a time.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Ministry Role</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-multi">Multi-Tag</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Life-Giving Ministries Member, Pastor, Trainer, Prayer Partner, Community Member. Multiple tags allowed simultaneously.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Global Advisory Council</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-bool">Checkbox</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">17 current members. Single checkbox.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other Info -->
+      <div class="field-group">
+        <div class="field-group-title">Other Info — Staff Only</div>
+        <div class="field-grid">
+          <div class="field-card">
+            <div class="fname">Involvement (4E)</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Single Select</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Exploring → Engaging → Equipping → Empowering</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Referred By</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-link">Linked Record</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Links to another constituent record. Similar to family linking.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Security Level</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Select</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">High Risk, Medium Risk, Low Risk. Used to filter communications/email lists for sensitive regions.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Time Zone</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-auto">Auto (country)</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">⚠️ Auto-populate by country but allow manual override — large countries (US, Canada, Brazil, Russia) span multiple zones.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Airport Preference</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-select">Searchable</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Charlene (travel coordinator) needs this. Must be a searchable typeahead with IATA codes — not a flat dropdown.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Present in Malta</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-bool">Checkbox</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Global congress attendance. Historical flag.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Notes</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Long Text</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Open-ended. Needs internal permission layer: private (author only) vs. admin-visible. ❓ TBD: one field with toggle or two separate fields.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Tags</div>
+            <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-multi">Multi-Tag</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Prayer/Care, Meeting, Personal Interaction, Ministry/Community. ❓ TBD with Owen: tag on interaction record or constituent record?</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity -->
+      <div class="field-group">
+        <div class="field-group-title">Activity Info — Staff Only (Derived from Other Modules)</div>
+        <div class="field-grid">
+          <div class="field-card">
+            <div class="fname">Groups</div>
+            <div class="fmeta"><span class="fpill pill-auto">Derived</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Which groups they're in, posting and commenting history.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Events</div>
+            <div class="fmeta"><span class="fpill pill-auto">Derived</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">Facilitator records, registration/attendance records. Show name, location, date, facilitator from activity view.</div>
+          </div>
+          <div class="field-card">
+            <div class="fname">Reading</div>
+            <div class="fmeta"><span class="fpill pill-auto">Derived</span><span class="fpill pill-staff">Staff Only</span></div>
+            <div class="fnote">What curriculum they've read and how far they've gotten.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. Organization -->
+  <div class="section" id="sec-org">
+    <div class="section-header" onclick="toggleSection('org')">
+      <div class="section-icon" style="background:var(--gold-bg);">🏛️</div>
+      <h2>Organization Record — Life-Giving Ministry / Church</h2>
+      <span class="badge" style="background:var(--gold-bg);color:var(--gold);">Phase 1</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="callout callout-gold">
+        <span class="callout-icon">💡</span>
+        <p><strong>Key insight:</strong> Organizations are first-class records — not just a field on a constituent. The "life-giving ministry/church" checkbox on each organization is what makes the homepage's 675+ ministries influenced number trackable as live data instead of a stale estimate.</p>
+      </div>
+      <div class="field-grid">
+        <div class="field-card">
+          <div class="fname">Organization Type</div>
+          <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-select">Select</span></div>
+          <div class="fnote">Church, Ministry, Other</div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Hub</div>
+          <div class="fmeta"><span class="fpill pill-required">Required</span><span class="fpill pill-auto">Auto-assigned</span></div>
+          <div class="fnote">Derived from country/address, same as constituent records.</div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Address / Location</div>
+          <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Text</span></div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Website</div>
+          <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">URL</span></div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Key Pastor / Leader</div>
+          <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-link">Linked Constituent</span></div>
+          <div class="fnote">Dropdown filtered to constituents with pastor/leader checkbox checked.</div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Leaders</div>
+          <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-link">Linked Constituents</span></div>
+          <div class="fnote">Full list of pastors/leaders affiliated with this org.</div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Life-Giving Ministry / Church</div>
+          <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-bool">Checkbox</span><span class="fpill pill-staff">Staff Only</span></div>
+          <div class="fnote">Categorizes whether this is an LGC/LGM. Powers the 675+ homepage KPI.</div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Events</div>
+          <div class="fmeta"><span class="fpill pill-auto">Derived</span></div>
+          <div class="fnote">Linked through affiliated ministries/churches in events module.</div>
+        </div>
+        <div class="field-card">
+          <div class="fname">Notes</div>
+          <div class="fmeta"><span class="fpill pill-optional">Optional</span><span class="fpill pill-text">Long Text</span><span class="fpill pill-staff">Staff Only</span></div>
+          <div class="fnote">Hidden behind permissions layer.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Hubs -->
+  <div class="section" id="sec-hubs">
+    <div class="section-header" onclick="toggleSection('hubs')">
+      <div class="section-icon" style="background:#E8F5FF;">🌍</div>
+      <h2>Global Hubs</h2>
+      <span class="badge" style="background:#E8F5FF;color:var(--blue);">Phase 1</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="hub-grid">
+        <div class="hub-card"><div class="hub-num">1</div><div class="hub-name">South Asia</div></div>
+        <div class="hub-card"><div class="hub-num">2</div><div class="hub-name">Latin America &amp; The Caribbean</div></div>
+        <div class="hub-card"><div class="hub-num">3</div><div class="hub-name">Europe</div></div>
+        <div class="hub-card"><div class="hub-num">4</div><div class="hub-name">Oceania</div></div>
+        <div class="hub-card"><div class="hub-num">5</div><div class="hub-name">Sub-Sahara Africa</div></div>
+        <div class="hub-card"><div class="hub-num">6</div><div class="hub-name">North America</div></div>
+        <div class="hub-card"><div class="hub-num">7</div><div class="hub-name">Eurasia</div></div>
+        <div class="hub-card"><div class="hub-num">8</div><div class="hub-name">East Asia</div></div>
+        <div class="hub-card"><div class="hub-num">9</div><div class="hub-name">Middle East &amp; North Africa</div></div>
+        <div class="hub-card"><div class="hub-num">10</div><div class="hub-name">Southeast Asia</div></div>
+      </div>
+      <div class="callout callout-red">
+        <span class="callout-icon">⚠️</span>
+        <p><strong>Architecture decision required:</strong> Hub must be its own lookup table (not just a field value) so that changing which countries belong to a hub automatically re-routes all constituents and organizations in those countries — without requiring bulk record re-assignment. Confirm with Ali before schema work begins.</p>
+      </div>
+      <div class="callout callout-blue">
+        <span class="callout-icon">📊</span>
+        <p><strong>Hub dashboard vision (Owen):</strong> Each hub should have a filtered dashboard surfacing: list and roles of hub officers, # and list of life-giving ministries and churches, # and list of hub leaders/members/contacts, % of constituents in each 4E stage, groups and recent activity. All derived data — no separate storage needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Certifications -->
+  <div class="section" id="sec-certifications">
+    <div class="section-header" onclick="toggleSection('certifications')">
+      <div class="section-icon" style="background:#EAF4EE;">🏅</div>
+      <h2>Certifications &amp; Trainer Classification</h2>
+      <span class="badge" style="background:var(--green-bg);color:var(--green);">Phase 1 — Core KPI</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="callout callout-gold">
+        <span class="callout-icon">🔑</span>
+        <p><strong>Key rule:</strong> A person holds ONE certification level per curriculum at a time. But they can hold DIFFERENT levels across DIFFERENT curriculums simultaneously — e.g., Master Trainer in JOL and Developing Trainer in ELT. Schema requires a composite key: person_id + curriculum_id.</p>
+      </div>
+      <div class="matrix-wrap" style="margin-bottom:1rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Curriculum</th>
+              <th>Abbrev.</th>
+              <th>Primary Purpose</th>
+              <th>Developing Trainer</th>
+              <th>Certified Trainer</th>
+              <th>Master Trainer</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Journey of a Life-Giver</strong></td>
+              <td>JOL</td>
+              <td>Core entry-point curriculum. Bread and butter. Delivered in 3.5–4 days all at once.</td>
+              <td>✓</td><td>✓</td><td>✓</td>
+            </tr>
+            <tr>
+              <td><strong>Equipping Life-Giving Trainers</strong></td>
+              <td>ELT</td>
+              <td>Train-the-trainer curriculum. Equips people to deliver JOL. Fewer events, staff-led.</td>
+              <td>✓</td><td>✓</td><td>✓</td>
+            </tr>
+            <tr>
+              <td><strong>Redemptive Conversations</strong></td>
+              <td>RC</td>
+              <td>Specialized/elective. Not sequential with JOL.</td>
+              <td>✓</td><td>✓</td><td>✓</td>
+            </tr>
+            <tr>
+              <td><strong>Post-Abortion Healing</strong></td>
+              <td>PAH</td>
+              <td>Specialized/elective. Not sequential with JOL.</td>
+              <td>✓</td><td>✓</td><td>✓</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout callout-green">
+        <span class="callout-icon">🔗</span>
+        <p><strong>The "Trained by" field:</strong> Every time a new certification is entered, it must link to the constituent record of the trainer who delivered it. This single field is what makes the multiplication chain traceable — who trained whom, going all the way up the lineage. It is the schema answer to Zack's ripple-effect tracking problem.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. Events -->
+  <div class="section" id="sec-events">
+    <div class="section-header" onclick="toggleSection('events')">
+      <div class="section-icon" style="background:var(--gold-bg);">📅</div>
+      <h2>Events &amp; Registrations</h2>
+      <span class="badge" style="background:var(--gold-bg);color:var(--gold);">Phase 2</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="two-col">
+        <div class="info-card">
+          <h4>Training Events</h4>
+          <ul>
+            <li>Tagged to one of 4 curriculum types</li>
+            <li>Facilitators linked to constituent records</li>
+            <li>Hub assignment</li>
+            <li>Date / Time</li>
+            <li>City-level location (not full address)</li>
+            <li>Registrants (ability to register)</li>
+            <li>Attendance (facilitator marks attended)</li>
+          </ul>
+        </div>
+        <div class="info-card">
+          <h4>Other Events</h4>
+          <ul>
+            <li>General gatherings not curriculum-tagged</li>
+            <li>Event Owner</li>
+            <li>Hub</li>
+            <li>Date / Time</li>
+            <li>Location</li>
+            <li>Registrants</li>
+            <li>Attendance</li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout callout-gold">
+        <span class="callout-icon">📋</span>
+        <p><strong>September event — near-term priority:</strong> Registration is being handled via Microsoft Forms, not native app registration. We need to map the Forms fields to the CRM schema before the event ends so attendee ingestion is clean on day one. Owen will send the Forms template. Flag this for Ali — it is a pre-event dependency, not a post-launch feature.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. Groups -->
+  <div class="section" id="sec-groups">
+    <div class="section-header" onclick="toggleSection('groups')">
+      <div class="section-icon" style="background:#EEE8FA;">💬</div>
+      <h2>Groups</h2>
+      <span class="badge" style="background:#EEE8FA;color:var(--purple);">Phase 2</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="callout callout-blue">
+        <span class="callout-icon">💡</span>
+        <p><strong>Owen's vision:</strong> Groups are the primary value-add for end users. Most leaders won't know they exist in the CRM — but they will experience the community through groups. The structure should be flexible enough for different cultures to adopt it differently.</p>
+      </div>
+      <table style="margin-bottom:1rem;">
+        <thead><tr><th>Group Type</th><th>How Created</th><th>Who Can Create</th><th>Scope</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Hub Group</strong></td>
+            <td>Auto-assigned from hub membership</td>
+            <td>System</td>
+            <td>All members of a hub. Could be large.</td>
+          </tr>
+          <tr>
+            <td><strong>Country Group</strong></td>
+            <td>Auto-assigned or manual</td>
+            <td>System / Hub Officers</td>
+            <td>All members in a specific country within a hub.</td>
+          </tr>
+          <tr>
+            <td><strong>Leadership Group</strong></td>
+            <td>Manual</td>
+            <td>Hub Officers / Hub Leaders</td>
+            <td>Hub officers + leaders only — strategy &amp; vision.</td>
+          </tr>
+          <tr>
+            <td><strong>Training Group</strong></td>
+            <td>Auto-created from event registration</td>
+            <td>System (triggered by event)</td>
+            <td>Registrants for a specific upcoming training.</td>
+          </tr>
+          <tr>
+            <td><strong>Custom Group</strong></td>
+            <td>Manual</td>
+            <td>Hub Officers / Hub Leaders</td>
+            <td>Any purpose — cross-hub, topic-specific, etc.</td>
+          </tr>
+          <tr>
+            <td><strong>Global Group</strong></td>
+            <td>Manual</td>
+            <td>Staff only</td>
+            <td>Spans all hubs. Hub dropdown set to "Global".</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-red">
+        <span class="callout-icon">⚠️</span>
+        <p><strong>Permission design needed:</strong> Must define clearly who can create groups, who can add/remove members, and what role level is required. Prevents general members from creating noise groups. Hub Officers and Hub Leaders = create. Hub Members = participate only.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. KPIs -->
+  <div class="section" id="sec-kpis">
+    <div class="section-header" onclick="toggleSection('kpis')">
+      <div class="section-icon" style="background:var(--blue-lt);">📊</div>
+      <h2>KPIs &amp; Donor Story</h2>
+      <span class="badge" style="background:var(--green-bg);color:var(--green);">Phase 3</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <table style="margin-bottom:1rem;">
+        <thead><tr><th>KPI</th><th>Internal CRM Metric</th><th>Donor-Facing Story</th><th>Schema Dependency</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Leaders Equipped</strong></td>
+            <td>Count of constituents who attended a training event (regardless of certification)</td>
+            <td>"50,000+ leaders equipped" — updated live</td>
+            <td>Event attendance record + constituent link</td>
+          </tr>
+          <tr>
+            <td><strong>Certified Trainers</strong></td>
+            <td>Count of constituents with ≥1 certification at any level, by curriculum &amp; level</td>
+            <td>"325+ trainers worldwide" — live, drillable</td>
+            <td>Certification record with curriculum + level</td>
+          </tr>
+          <tr>
+            <td><strong>Nations Impacted</strong></td>
+            <td>Count of distinct country_codes across all constituent &amp; event records</td>
+            <td>"170+ nations" — live count</td>
+            <td>country_code required on every record</td>
+          </tr>
+          <tr>
+            <td><strong>Ministries Influenced</strong></td>
+            <td>Count of Organization records with LGM/LGC checkbox = true</td>
+            <td>"675+ life-giving ministries" — live count</td>
+            <td>LGM checkbox on Organization record</td>
+          </tr>
+          <tr>
+            <td><strong>Trained Leaders by Country</strong></td>
+            <td>Event attendance grouped by country_code, filterable by date range</td>
+            <td>Donor drill-down: "X leaders trained in Kenya in Q2"</td>
+            <td>country_code on every event attendance record</td>
+          </tr>
+          <tr>
+            <td><strong>Multiplication Rate</strong></td>
+            <td>Ratio of Master Trainers to trainers they've endorsed via "trained by" field</td>
+            <td>"Each Master Trainer is multiplying through X new trainers"</td>
+            <td>"Trained by" foreign key on certification record</td>
+          </tr>
+          <tr>
+            <td><strong>Cost Per Trained Leader</strong></td>
+            <td>Program spend ÷ certified leader count per period</td>
+            <td>"Your gift trains a leader for $X"</td>
+            <td>Requires finance data integration — design now</td>
+          </tr>
+          <tr>
+            <td><strong>4E Funnel</strong></td>
+            <td>% of constituents at each Exploring/Engaging/Equipping/Empowering stage by hub</td>
+            <td>Internal leadership &amp; board reporting</td>
+            <td>4E field on constituent + hub filter</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="callout callout-green">
+        <span class="callout-icon">🏆</span>
+        <p><strong>The gold standard message:</strong> "Because of your gift, 12 leaders were certified in Kenya this spring." Requires gift record + certification record + country_code to share a relational key. Design this linkage now even if the donor-facing report ships in Phase 3.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. Phases -->
+  <div class="section" id="sec-phases">
+    <div class="section-header" onclick="toggleSection('phases')">
+      <div class="section-icon" style="background:var(--gray-bg);">🗺️</div>
+      <h2>Phased Build Plan</h2>
+      <span class="badge" style="background:var(--gray-bg);color:var(--gray-mid);">Roadmap</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="phase-banner phase-1">
+        <div class="phase-num">1</div>
+        <div>
+          <h3>Data Architecture &amp; Constituent Structure</h3>
+          <p>Build the core schema before any feature modules. Constituent records, Organization records, Hub lookup table with country-to-hub mapping, Certification records with trained-by linkage, Hub/Ministry roles, 4E engagement system, security levels. Define all field types, required/optional status, and permission levels. Map Microsoft Forms fields for September event import. Confirm country_code as required at ingestion.</p>
+        </div>
+      </div>
+      <div class="phase-banner phase-2">
+        <div class="phase-num">2</div>
+        <div>
+          <h3>Groups, Events &amp; Registrations</h3>
+          <p>Build the Groups module with hub-based auto-assignment, event-triggered group creation, and permission tiers for group creation. Build the Events/Registration structure for Training events (curriculum-tagged) and Other events. Ingest September event attendees from Microsoft Forms and begin tracking certification status.</p>
+        </div>
+      </div>
+      <div class="phase-banner phase-3">
+        <div class="phase-num">3</div>
+        <div>
+          <h3>Dashboards, KPIs &amp; Donor Story</h3>
+          <p>Hub-level filtered dashboards for hub officers and leaders. Live versions of the four homepage KPIs (leaders equipped, trainers worldwide, nations, ministries). Donor drill-down by country and period. Multiplication rate reporting. Story-flagging layer for Alyssa's communications team. Design the gift-to-impact attribution linkage for donor retention messaging.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 11. Open Questions -->
+  <div class="section" id="sec-openq">
+    <div class="section-header" onclick="toggleSection('openq')">
+      <div class="section-icon" style="background:var(--red-bg);">❓</div>
+      <h2>Open Questions — Must Resolve Before Schema Locks</h2>
+      <span class="badge" style="background:var(--red-bg);color:var(--red);">Blocking</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="question-list">
+        <div class="q-item">
+          <div class="q-num">1</div>
+          <div class="q-body">
+            <strong>Hub lookup table architecture — confirm with Ali</strong>
+            <p>Hub must be a standalone table (not just a field value) so country-to-hub remapping updates all records automatically. Verify this is Ali's approach before schema work starts.</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">2</div>
+          <div class="q-body">
+            <strong>Address contextualization — scope decision for Dan</strong>
+            <p>Country-specific address structures (US needs state, other countries differ) and city autocomplete/geocoding API. What's the right approach and Phase 1 scope?</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">3</div>
+          <div class="q-body">
+            <strong>Notes permission model — for Owen</strong>
+            <p>Private notes vs. admin-visible notes: one field with a visibility toggle, or two separate fields? Owen mentioned wanting this but didn't specify implementation preference.</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">4</div>
+          <div class="q-body">
+            <strong>Tags — interaction-level or constituent-level? — for Owen</strong>
+            <p>Do Prayer/Care, Meeting, Personal Interaction, Ministry/Community tag an individual note/interaction record, or do they tag the constituent record itself? Different schema implications.</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">5</div>
+          <div class="q-body">
+            <strong>Microsoft Forms template for September — urgent</strong>
+            <p>Need Owen to share the current Forms fields so we can map them to the schema before the event. This is a pre-event dependency, not a post-launch nice-to-have.</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">6</div>
+          <div class="q-body">
+            <strong>Country-to-hub mapping list — from Owen</strong>
+            <p>All 10 hubs with their assigned countries. Required before hub auto-assignment logic can be built. Owen confirmed he'd send this.</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">7</div>
+          <div class="q-body">
+            <strong>App store permissions — internal Pipeline</strong>
+            <p>Apple and Google approval for new version through Pipeline's account could come end of next week. Old version needs to come down when new is approved. Who on the Pipeline side currently holds permissions for the existing listing?</p>
+          </div>
+        </div>
+        <div class="q-item">
+          <div class="q-num">8</div>
+          <div class="q-body">
+            <strong>Gift-to-impact linkage design — for Dan</strong>
+            <p>The donor attribution message ("your gift trained 12 leaders in Kenya") requires gift records and training records to share a relational key. Even if donor integration is Phase 3, the foreign key design decision needs to happen in Phase 1 schema work.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 12. Action Items -->
+  <div class="section" id="sec-actions">
+    <div class="section-header" onclick="toggleSection('actions')">
+      <div class="section-icon" style="background:var(--green-bg);">✅</div>
+      <h2>Action Items</h2>
+      <span class="badge" style="background:var(--green-bg);color:var(--green);">Next Steps</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="action-list">
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Send <strong>country-to-hub mapping list</strong> (all 10 hubs + assigned countries) — blocking for hub auto-assignment build</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Send <strong>Microsoft Forms template</strong> for September event — needed to map fields to CRM schema before the event</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Send <strong>mind map full export</strong> (all sections expanded as PDF)</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Clarify <strong>Notes permission model</strong>: one field with toggle or two separate fields?</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Clarify <strong>Tags</strong>: do they tag a note/interaction record or the constituent record itself?</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Confirm <strong>Charlene's airport preference workflow</strong> — does a searchable IATA code typeahead work for her needs?</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-li">Owen / LI</span>
+          <p>Advise on <strong>app store transition</strong> timing — notify Brian when Apple approval comes through so Pipeline can coordinate pulling the old version</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-pipe">Pipeline / Brian</span>
+          <p>Share this build plan with <strong>Dan</strong> for UI/UX review — especially hub dashboard and constituent profile view</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-pipe">Pipeline / Brian</span>
+          <p>Work with <strong>Ali</strong> to translate this field spec into a formal Postgres schema with data types, required flags, and permission levels</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-pipe">Pipeline / Brian</span>
+          <p>Flag <strong>address contextualization and city geocoding API</strong> as scope items for Dan — Phase 1 decision needed</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-pipe">Pipeline / Ali</span>
+          <p>Confirm <strong>Hub as standalone lookup table</strong> architecture before schema work begins</p>
+        </div>
+        <div class="action-item">
+          <span class="action-owner action-both">Both</span>
+          <p>Design the <strong>gift-to-impact relational key</strong> — even if donor integration is Phase 3, the foreign key must be built into the Phase 1 schema</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function toggleSection(id) {
+    const header = document.querySelector(`#sec-${id} .section-header`);
+    const body   = document.querySelector(`#sec-${id} .section-body`);
+    header.classList.toggle('open');
+    body.classList.toggle('open');
+  }
+
+  function openSection(id) {
+    const header = document.querySelector(`#sec-${id} .section-header`);
+    const body   = document.querySelector(`#sec-${id} .section-body`);
+    if (!header.classList.contains('open')) {
+      header.classList.add('open');
+      body.classList.add('open');
+    }
+    document.getElementById(`sec-${id}`).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Open first section by default
+  document.querySelector('#sec-overview .section-body').classList.add('open');
+  document.querySelector('#sec-overview .section-header').classList.add('open');
+</script>
+</body>
+</html>
