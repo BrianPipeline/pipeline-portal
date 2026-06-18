@@ -319,8 +319,6 @@
   .q-item.checked .q-num { background: var(--green); }
   .q-item.checked .q-num .q-num-label { display: none; }
   .q-item.checked .q-num .q-check { display: flex; }
-  #sec-roles .q-item { cursor: default; }
-  #sec-roles .q-item:hover { border-color: var(--border); }
   .q-body { padding: 11px 14px; }
   .q-body strong { display: block; font-size: 13.5px; color: var(--navy); margin-bottom: 3px; }
   .q-body p { font-size: 12.5px; color: var(--gray-mid); line-height: 1.6; }
@@ -578,29 +576,29 @@
       <div class="field-group" style="margin-bottom:0;">
         <div class="field-group-title">Part 4 — Open Discovery Questions</div>
         <div class="question-list">
-          <div class="q-item">
-            <div class="q-num"><span class="q-num-label">1</span></div>
+          <div class="q-item" data-index="0" role="checkbox" aria-checked="false" tabindex="0">
+            <div class="q-num"><span class="q-num-label">1</span><span class="q-check" aria-hidden="true">✓</span></div>
             <div class="q-body">
               <strong>Hub officer access</strong>
               <p>When a hub officer logs in, should they see all constituent records in their hub, or only people they have directly interacted with? Do any Hub Chairs need visibility across multiple hubs?</p>
             </div>
           </div>
-          <div class="q-item">
-            <div class="q-num"><span class="q-num-label">2</span></div>
+          <div class="q-item" data-index="1" role="checkbox" aria-checked="false" tabindex="0">
+            <div class="q-num"><span class="q-num-label">2</span><span class="q-check" aria-hidden="true">✓</span></div>
             <div class="q-body">
               <strong>CRM edit rights</strong>
               <p>Should hub officers ever be able to update a constituent record (mark a certification, update a hub role)? Or is all CRM data entry strictly staff-only?</p>
             </div>
           </div>
-          <div class="q-item">
-            <div class="q-num"><span class="q-num-label">3</span></div>
+          <div class="q-item" data-index="2" role="checkbox" aria-checked="false" tabindex="0">
+            <div class="q-num"><span class="q-num-label">3</span><span class="q-check" aria-hidden="true">✓</span></div>
             <div class="q-body">
               <strong>Sensitive field visibility</strong>
               <p>Security Level, private notes, and the Referred By field are clearly staff-only. Are there other fields hub leaders should never see even for people in their own hub?</p>
             </div>
           </div>
-          <div class="q-item">
-            <div class="q-num"><span class="q-num-label">4</span></div>
+          <div class="q-item" data-index="3" role="checkbox" aria-checked="false" tabindex="0">
+            <div class="q-num"><span class="q-num-label">4</span><span class="q-check" aria-hidden="true">✓</span></div>
             <div class="q-body">
               <strong>Role assignment ownership</strong>
               <p>Who on the Life International team assigns the <code>hub_manager</code> role to a hub officer? Is this a staff admin action only, or can existing hub chairs nominate new hub managers?</p>
@@ -1421,6 +1419,9 @@
     document.querySelectorAll('#sec-openq .q-item').forEach(item => {
       setOpenQChecked(item, false);
     });
+    document.querySelectorAll('#sec-roles .q-item').forEach(item => {
+      setRolesQChecked(item, false);
+    });
   });
 
   restoreActionItems();
@@ -1470,6 +1471,52 @@
   });
 
   restoreOpenQItems();
+
+  // Roles discovery questions checklist
+  const ROLES_STORAGE_PREFIX = 'roles-';
+
+  function rolesStorageKey(index) {
+    return ROLES_STORAGE_PREFIX + index;
+  }
+
+  function saveRolesQState(index, checked) {
+    const key = rolesStorageKey(index);
+    if (checked) {
+      localStorage.setItem(key, 'true');
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
+  function setRolesQChecked(item, checked) {
+    item.classList.toggle('checked', checked);
+    item.setAttribute('aria-checked', checked ? 'true' : 'false');
+    saveRolesQState(item.dataset.index, checked);
+  }
+
+  function toggleRolesQItem(item) {
+    setRolesQChecked(item, !item.classList.contains('checked'));
+  }
+
+  function restoreRolesQItems() {
+    document.querySelectorAll('#sec-roles .q-item').forEach(item => {
+      if (localStorage.getItem(rolesStorageKey(item.dataset.index))) {
+        setRolesQChecked(item, true);
+      }
+    });
+  }
+
+  document.querySelectorAll('#sec-roles .q-item').forEach(item => {
+    item.addEventListener('click', () => toggleRolesQItem(item));
+    item.addEventListener('keydown', e => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggleRolesQItem(item);
+      }
+    });
+  });
+
+  restoreRolesQItems();
 </script>
 </body>
 </html>
