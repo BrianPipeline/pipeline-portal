@@ -319,9 +319,41 @@
   .q-item.checked .q-num { background: var(--green); }
   .q-item.checked .q-num .q-num-label { display: none; }
   .q-item.checked .q-num .q-check { display: flex; }
-  .q-body { padding: 11px 14px; }
+  .q-body { padding: 11px 14px; flex: 1; min-width: 0; }
   .q-body strong { display: block; font-size: 13.5px; color: var(--navy); margin-bottom: 3px; }
   .q-body p { font-size: 12.5px; color: var(--gray-mid); line-height: 1.6; }
+  .q-resolution {
+    margin-top: 10px;
+    user-select: text;
+    cursor: auto;
+  }
+  .q-resolution-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+    margin-bottom: 6px;
+  }
+  .q-resolution-input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--gray-text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: var(--white);
+    resize: vertical;
+    min-height: 52px;
+  }
+  .q-resolution-input:focus {
+    outline: none;
+    border-color: var(--blue-mid);
+  }
+  .q-resolution-input::placeholder { color: #999; }
 
   /* ── Curriculum matrix ── */
   .matrix-wrap { overflow-x: auto; }
@@ -1419,6 +1451,7 @@
     document.querySelectorAll('#sec-openq .q-item').forEach(item => {
       setOpenQChecked(item, false);
     });
+    clearOpenQResolutions();
     document.querySelectorAll('#sec-roles .q-item').forEach(item => {
       setRolesQChecked(item, false);
     });
@@ -1428,9 +1461,14 @@
 
   // Open questions checklist
   const OPENQ_STORAGE_PREFIX = 'openq-';
+  const OPENQ_RESOLUTION_PREFIX = 'openq-resolution-';
 
   function openQStorageKey(index) {
     return OPENQ_STORAGE_PREFIX + index;
+  }
+
+  function openQResolutionKey(index) {
+    return OPENQ_RESOLUTION_PREFIX + index;
   }
 
   function saveOpenQState(index, checked) {
@@ -1442,14 +1480,70 @@
     }
   }
 
+  function saveOpenQResolution(index, value) {
+    const key = openQResolutionKey(index);
+    if (value.trim()) {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
   function setOpenQChecked(item, checked) {
     item.classList.toggle('checked', checked);
     item.setAttribute('aria-checked', checked ? 'true' : 'false');
     saveOpenQState(item.dataset.index, checked);
+    const resolution = item.querySelector('.q-resolution');
+    if (resolution) resolution.hidden = !checked;
   }
 
   function toggleOpenQItem(item) {
     setOpenQChecked(item, !item.classList.contains('checked'));
+  }
+
+  function initOpenQResolutionFields() {
+    document.querySelectorAll('#sec-openq .q-item').forEach(item => {
+      const index = item.dataset.index;
+      const body = item.querySelector('.q-body');
+      if (body.querySelector('.q-resolution')) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'q-resolution';
+      wrap.hidden = !item.classList.contains('checked');
+
+      const label = document.createElement('label');
+      label.className = 'q-resolution-label';
+      label.textContent = 'Resolution';
+
+      const textarea = document.createElement('textarea');
+      textarea.className = 'q-resolution-input';
+      textarea.placeholder = 'What was decided or found...';
+      textarea.rows = 2;
+
+      const saved = localStorage.getItem(openQResolutionKey(index));
+      if (saved) textarea.value = saved;
+
+      wrap.appendChild(label);
+      wrap.appendChild(textarea);
+      body.appendChild(wrap);
+
+      let debounceTimer;
+      textarea.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => saveOpenQResolution(index, textarea.value), 300);
+      });
+      textarea.addEventListener('blur', () => saveOpenQResolution(index, textarea.value));
+      wrap.addEventListener('click', e => e.stopPropagation());
+      textarea.addEventListener('keydown', e => e.stopPropagation());
+    });
+  }
+
+  function clearOpenQResolutions() {
+    document.querySelectorAll('#sec-openq .q-item').forEach(item => {
+      localStorage.removeItem(openQResolutionKey(item.dataset.index));
+      const textarea = item.querySelector('.q-resolution-input');
+      if (textarea) textarea.value = '';
+    });
   }
 
   function restoreOpenQItems() {
@@ -1460,9 +1554,15 @@
     });
   }
 
+  initOpenQResolutionFields();
+
   document.querySelectorAll('#sec-openq .q-item').forEach(item => {
-    item.addEventListener('click', () => toggleOpenQItem(item));
+    item.addEventListener('click', e => {
+      if (e.target.closest('.q-resolution')) return;
+      toggleOpenQItem(item);
+    });
     item.addEventListener('keydown', e => {
+      if (e.target.closest('.q-resolution')) return;
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         toggleOpenQItem(item);
