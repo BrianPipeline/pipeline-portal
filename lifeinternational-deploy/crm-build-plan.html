@@ -406,6 +406,7 @@
   <!-- TOC -->
   <div class="toc">
     <div class="toc-item" onclick="openSection('overview')"><span class="toc-icon">📋</span> Overview & North Star</div>
+    <div class="toc-item" onclick="openSection('phases')"><span class="toc-icon">🗺️</span> Phased Build Plan</div>
     <div class="toc-item" onclick="openSection('architecture')"><span class="toc-icon">🏗️</span> Data Architecture</div>
     <div class="toc-item" onclick="openSection('roles')"><span class="toc-icon">🔐</span> User Roles & Permissions</div>
     <div class="toc-item" onclick="openSection('constituent')"><span class="toc-icon">👤</span> Constituent Record</div>
@@ -415,7 +416,6 @@
     <div class="toc-item" onclick="openSection('events')"><span class="toc-icon">📅</span> Events & Registrations</div>
     <div class="toc-item" onclick="openSection('groups')"><span class="toc-icon">💬</span> Groups</div>
     <div class="toc-item" onclick="openSection('kpis')"><span class="toc-icon">📊</span> KPIs & Donor Story</div>
-    <div class="toc-item" onclick="openSection('phases')"><span class="toc-icon">🗺️</span> Phased Build Plan</div>
     <div class="toc-item" onclick="openSection('openq')"><span class="toc-icon">❓</span> Open Questions</div>
     <div class="toc-item" onclick="openSection('actions')"><span class="toc-icon">✅</span> Action Items</div>
   </div>
@@ -458,6 +458,39 @@
       <div class="callout callout-blue">
         <span class="callout-icon">💡</span>
         <p><strong>Owen's framing:</strong> Hub structure is the multiplication strategy. Trainings are the bread and butter. Groups are the primary end-user value-add. The CRM underpins all three — most leaders won't even know they exist in it, but every meaningful interaction flows through it.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phased Build Plan -->
+  <div class="section" id="sec-phases">
+    <div class="section-header" onclick="toggleSection('phases')">
+      <div class="section-icon" style="background:var(--gray-bg);">🗺️</div>
+      <h2>Phased Build Plan</h2>
+      <span class="badge" style="background:var(--gray-bg);color:var(--gray-mid);">Roadmap</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="section-body">
+      <div class="phase-banner phase-1">
+        <div class="phase-num">1</div>
+        <div>
+          <h3>Data Architecture &amp; Constituent Structure</h3>
+          <p>Build the core schema before any feature modules. Constituent records, Organization records, Hub lookup table with country-to-hub mapping, Certification records with trained-by linkage, Hub/Ministry roles, 4E engagement system, security levels. Define all field types, required/optional status, and permission levels. Map Microsoft Forms fields for September event import. Confirm country_code as required at ingestion.</p>
+        </div>
+      </div>
+      <div class="phase-banner phase-2">
+        <div class="phase-num">2</div>
+        <div>
+          <h3>Groups, Events &amp; Registrations</h3>
+          <p>Build the Groups module with hub-based auto-assignment, event-triggered group creation, and permission tiers for group creation. Build the Events/Registration structure for Training events (curriculum-tagged) and Other events. Ingest September event attendees from Microsoft Forms and begin tracking certification status.</p>
+        </div>
+      </div>
+      <div class="phase-banner phase-3">
+        <div class="phase-num">3</div>
+        <div>
+          <h3>Dashboards, KPIs &amp; Donor Story</h3>
+          <p>Hub-level filtered dashboards for hub officers and leaders. Live versions of the four homepage KPIs (leaders equipped, trainers worldwide, nations, ministries). Donor drill-down by country and period. Multiplication rate reporting. Story-flagging layer for Alyssa's communications team. Design the gift-to-impact attribution linkage for donor retention messaging.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1184,39 +1217,6 @@
       <div class="callout callout-green">
         <span class="callout-icon">🏆</span>
         <p><strong>The gold standard message:</strong> "Because of your gift, 12 leaders were certified in Kenya this spring." Requires gift record + certification record + country_code to share a relational key. Design this linkage now even if the donor-facing report ships in Phase 3.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 10. Phases -->
-  <div class="section" id="sec-phases">
-    <div class="section-header" onclick="toggleSection('phases')">
-      <div class="section-icon" style="background:var(--gray-bg);">🗺️</div>
-      <h2>Phased Build Plan</h2>
-      <span class="badge" style="background:var(--gray-bg);color:var(--gray-mid);">Roadmap</span>
-      <span class="chevron">▼</span>
-    </div>
-    <div class="section-body">
-      <div class="phase-banner phase-1">
-        <div class="phase-num">1</div>
-        <div>
-          <h3>Data Architecture &amp; Constituent Structure</h3>
-          <p>Build the core schema before any feature modules. Constituent records, Organization records, Hub lookup table with country-to-hub mapping, Certification records with trained-by linkage, Hub/Ministry roles, 4E engagement system, security levels. Define all field types, required/optional status, and permission levels. Map Microsoft Forms fields for September event import. Confirm country_code as required at ingestion.</p>
-        </div>
-      </div>
-      <div class="phase-banner phase-2">
-        <div class="phase-num">2</div>
-        <div>
-          <h3>Groups, Events &amp; Registrations</h3>
-          <p>Build the Groups module with hub-based auto-assignment, event-triggered group creation, and permission tiers for group creation. Build the Events/Registration structure for Training events (curriculum-tagged) and Other events. Ingest September event attendees from Microsoft Forms and begin tracking certification status.</p>
-        </div>
-      </div>
-      <div class="phase-banner phase-3">
-        <div class="phase-num">3</div>
-        <div>
-          <h3>Dashboards, KPIs &amp; Donor Story</h3>
-          <p>Hub-level filtered dashboards for hub officers and leaders. Live versions of the four homepage KPIs (leaders equipped, trainers worldwide, nations, ministries). Donor drill-down by country and period. Multiplication rate reporting. Story-flagging layer for Alyssa's communications team. Design the gift-to-impact attribution linkage for donor retention messaging.</p>
-        </div>
       </div>
     </div>
   </div>
