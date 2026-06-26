@@ -412,6 +412,7 @@
 
   const TOC_ITEMS = [
     { id: 'overview', icon: '🎯', label: 'Overview & North Star' },
+    { id: 'roadmap', icon: '🗺️', label: 'Phased Build Plan' },
     { id: 'data-arch', icon: '🗂️', label: 'Data Architecture' },
     { id: 'roles', icon: '🔐', label: 'User Roles & Permissions' },
     { id: 'bill-record', icon: '📄', label: 'Bill Record' },
@@ -419,7 +420,6 @@
     { id: 'cross-cycle', icon: '🔗', label: 'Cross-Cycle Linking' },
     { id: 'director', icon: '👤', label: 'Director Assignment' },
     { id: 'ai', icon: '✨', label: 'AI Enhancements' },
-    { id: 'roadmap', icon: '🗺️', label: 'Phased Build Plan' },
     { id: 'questions', icon: '❓', label: 'Open Questions' },
     { id: 'actions', icon: '✅', label: 'Action Items' },
   ];
@@ -523,6 +523,16 @@
       },
     },
     {
+      id: 'roadmap',
+      icon: '🗺️',
+      iconBg: 'var(--gray-bg)',
+      title: 'Phased Build Plan',
+      pill: 'Roadmap',
+      pillStyle: 'roadmap',
+      bodyType: 'roadmap',
+      body: { phases: ROADMAP_PHASES },
+    },
+    {
       id: 'data-arch',
       icon: '🗂️',
       iconBg: 'var(--blue-lt)',
@@ -606,16 +616,6 @@
       pillStyle: 'phase2',
       bodyType: 'fieldTable',
       body: { columns: ['Feature', 'Description'], rows: AI_FEATURES },
-    },
-    {
-      id: 'roadmap',
-      icon: '🗺️',
-      iconBg: 'var(--gray-bg)',
-      title: 'Phased Build Plan',
-      pill: 'Roadmap',
-      pillStyle: 'roadmap',
-      bodyType: 'roadmap',
-      body: { phases: ROADMAP_PHASES },
     },
     {
       id: 'questions',
