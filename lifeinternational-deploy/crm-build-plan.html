@@ -1459,6 +1459,7 @@
     document.querySelectorAll('#sec-roles .q-item').forEach(item => {
       setRolesQChecked(item, false);
     });
+    clearRolesQResolutions();
   });
 
   restoreActionItems();
@@ -1578,9 +1579,14 @@
 
   // Roles discovery questions checklist
   const ROLES_STORAGE_PREFIX = 'roles-';
+  const ROLES_RESOLUTION_PREFIX = 'roles-resolution-';
 
   function rolesStorageKey(index) {
     return ROLES_STORAGE_PREFIX + index;
+  }
+
+  function rolesResolutionKey(index) {
+    return ROLES_RESOLUTION_PREFIX + index;
   }
 
   function saveRolesQState(index, checked) {
@@ -1592,14 +1598,72 @@
     }
   }
 
+  function saveRolesQResolution(index, value) {
+    const key = rolesResolutionKey(index);
+    if (value.trim()) {
+      localStorage.setItem(key, value);
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
   function setRolesQChecked(item, checked) {
     item.classList.toggle('checked', checked);
     item.setAttribute('aria-checked', checked ? 'true' : 'false');
     saveRolesQState(item.dataset.index, checked);
+    const resolution = item.querySelector('.q-resolution');
+    if (resolution) resolution.hidden = !checked;
   }
 
   function toggleRolesQItem(item) {
     setRolesQChecked(item, !item.classList.contains('checked'));
+  }
+
+  function initRolesQResolutionFields() {
+    document.querySelectorAll('#sec-roles .q-item').forEach(item => {
+      const index = item.dataset.index;
+      const body = item.querySelector('.q-body');
+      if (body.querySelector('.q-resolution')) return;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'q-resolution';
+      wrap.hidden = !item.classList.contains('checked');
+
+      const label = document.createElement('label');
+      label.className = 'q-resolution-label';
+      label.textContent = 'Resolution';
+      label.setAttribute('for', `roles-resolution-${index}`);
+
+      const textarea = document.createElement('textarea');
+      textarea.className = 'q-resolution-input';
+      textarea.id = `roles-resolution-${index}`;
+      textarea.placeholder = 'What was decided or found...';
+      textarea.rows = 2;
+
+      const saved = localStorage.getItem(rolesResolutionKey(index));
+      if (saved) textarea.value = saved;
+
+      wrap.appendChild(label);
+      wrap.appendChild(textarea);
+      body.appendChild(wrap);
+
+      let debounceTimer;
+      textarea.addEventListener('input', () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => saveRolesQResolution(index, textarea.value), 300);
+      });
+      textarea.addEventListener('blur', () => saveRolesQResolution(index, textarea.value));
+      wrap.addEventListener('click', e => e.stopPropagation());
+      textarea.addEventListener('keydown', e => e.stopPropagation());
+    });
+  }
+
+  function clearRolesQResolutions() {
+    document.querySelectorAll('#sec-roles .q-item').forEach(item => {
+      localStorage.removeItem(rolesResolutionKey(item.dataset.index));
+      const textarea = item.querySelector('.q-resolution-input');
+      if (textarea) textarea.value = '';
+    });
   }
 
   function restoreRolesQItems() {
@@ -1610,9 +1674,15 @@
     });
   }
 
+  initRolesQResolutionFields();
+
   document.querySelectorAll('#sec-roles .q-item').forEach(item => {
-    item.addEventListener('click', () => toggleRolesQItem(item));
+    item.addEventListener('click', e => {
+      if (e.target.closest('.q-resolution')) return;
+      toggleRolesQItem(item);
+    });
     item.addEventListener('keydown', e => {
+      if (e.target.closest('.q-resolution')) return;
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
         toggleRolesQItem(item);
