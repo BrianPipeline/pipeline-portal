@@ -417,6 +417,8 @@
     { id: 'roles', icon: '🔐', label: 'User Roles & Permissions' },
     { id: 'bill-record', icon: '📄', label: 'Bill Record' },
     { id: 'position', icon: '🏛️', label: 'MCPP Position & Priority' },
+    { id: 'testimony', icon: '📋', label: 'Testimony Activity' },
+    { id: 'stakeholders', icon: '🤝', label: 'Stakeholders' },
     { id: 'cross-cycle', icon: '🔗', label: 'Cross-Cycle Linking' },
     { id: 'director', icon: '👤', label: 'Director Assignment' },
     { id: 'ai', icon: '✨', label: 'AI Enhancements' },
@@ -428,14 +430,16 @@
     { kind: 'core', tag: 'CORE', title: 'Bill Record', description: 'Number, title, sponsor, status, full text, history. One record per bill per legislative cycle.' },
     { kind: 'core', tag: 'CORE', title: 'MCPP Position Record', description: 'Support/Oppose/Watching/Unimportant, priority, published/unpublished flag, notes, director.' },
     { kind: 'core', tag: 'CORE', title: 'Cross-Cycle Link', description: 'Connects a bill to its prior-session incarnation(s). The actual differentiator from Quorum.' },
-    { kind: 'supporting', tag: 'SUPPORTING', title: 'Document & Testimony', description: 'Uploaded files, committee testimony checkboxes, printable activity report.' },
+    { kind: 'supporting', tag: 'SUPPORTING', title: 'Document & Testimony', description: 'Uploaded files (bill_documents table) plus testimony activity checkboxes — committee card, written testimony, verbal testimony House/Senate — with printable activity report. Stored in separate testimony_activity table.' },
+    { kind: 'supporting', tag: 'SUPPORTING', title: 'Stakeholders', description: 'Organizations and individuals in support or opposition of a bill. Manual entry in Phase 1; committee minutes scraping in Phase 2. Stored in bill_stakeholders table.' },
     { kind: 'supporting', tag: 'SUPPORTING', title: 'Category Tag', description: "MCPP topic taxonomy for cross-search. Pending Cami's category list." },
     { kind: 'supporting', tag: 'SUPPORTING', title: 'Staff & Roles', description: 'Policy director directory, GA staff, edit vs. read-only permissions.' },
   ];
 
   const BILL_RECORD_FIELDS = [
     { field: 'Legislative Cycle', description: 'Two-year designation, e.g. 2025–2026.' },
-    { field: 'Bill/Resolution Number', description: 'HB, SB, HR, SR, HCR, SCR, HJR, SJR.' },
+    { field: 'Bill/Resolution Number', description: "HB, SB, HR, SR, HCR, SCR, HJR, SJR. Stored as bill_type (enum) + bill_number (integer) separately. Chamber is derived from bill_type, not stored independently. Display string composed at app layer as 'HB 4001'." },
+    { field: 'Bill Type', description: "Enum: HB | SB | HR | SR | HCR | SCR | HJR | SJR. Replaces the earlier 'chamber: house|senate' model. All eight Michigan instrument types must be supported per Cami's requirements doc." },
     { field: 'Title', description: 'One- to two-line description.' },
     { field: 'Sponsor & Co-sponsors', description: 'A working scraper exists for this', tag: { label: 'verify', variant: 'default' }, descriptionSuffix: ' but is disconnected from any database today.' },
     { field: 'Status & History', description: 'Current stage plus completed stage history.' },
@@ -444,11 +448,27 @@
   ];
 
   const POSITION_FIELDS = [
-    { field: 'Position', description: 'Support / Oppose / Watching / Unimportant.' },
+    { field: 'Position', description: "Support / Oppose / Watching / Unimportant. ⚠️ Confirmed 4 values from Cami's written requirements doc (May 5). Earlier design used 8-value rubric — NOT confirmed. Pending Cami clarification before schema is deployed." },
     { field: 'Published Flag', description: 'Public or internal-only. MCPP often holds a position it deliberately does not publish.', tag: { label: 'new — Gap 7', variant: 'new' } },
     { field: 'Priority', description: 'High (testify in person), Medium (turn in a card), Low (no action).' },
     { field: 'Director Assignment', description: 'Auto email notification to assigned policy director.' },
     { field: 'MCPP Notes', description: 'Shared field for GA staff and the lead policy director.' },
+    { field: 'Workflow Status', description: "GA team's internal progress tracker, separate from legislative status. Values: Assigned → Under Review → Position Given → Priority Given → Mackinac Description Given for MichiganVotes. Source: Cami's requirements doc." },
+  ];
+
+  const TESTIMONY_FIELDS = [
+    { field: 'Committee Card', description: 'Checkbox — did MCPP submit a committee card on this bill?' },
+    { field: 'Written Testimony', description: 'Checkbox — did MCPP submit written testimony?' },
+    { field: 'Verbal Testimony — House', description: 'Checkbox — did MCPP provide verbal testimony at a House committee?' },
+    { field: 'Verbal Testimony — Senate', description: 'Checkbox — did MCPP provide verbal testimony at a Senate committee?' },
+    { field: 'Activity Notes', description: 'Free text field for additional context on the testimony activity' },
+    { field: 'Printable Activity Report', description: 'Required deliverable — printable/exportable report of testimony activity across all bills in a session, filterable by date range and policy director' },
+  ];
+
+  const STAKEHOLDER_FIELDS = [
+    { field: 'Name', description: 'Organization or individual name' },
+    { field: 'Stance', description: 'Support / Oppose / Neutral / Unknown' },
+    { field: 'Source', description: 'Manual (Phase 1) or Committee Minutes Scrape (Phase 2)' },
   ];
 
   const CROSS_CYCLE_STATUS = [
@@ -478,8 +498,9 @@
     { title: 'Auto-population vs. manual entry', status: 'Partially resolved', statusVariant: 'pending', description: 'A working scraper exists for legislature.mi.gov but is disconnected from the app. Decision is whether to fund the ingestion pipeline.' },
     { title: 'User roles and permissions', status: 'Awaiting Cami', statusVariant: 'pending', description: 'Edit vs. read-only access undefined. GA staff only, or policy directors too?' },
     { title: 'MichiganVotes reference', status: 'Awaiting Cami', statusVariant: 'pending', description: 'Appears once in the staff progress statuses with no context. Unclear if external integration is required.' },
-    { title: 'MIRS historical export', status: 'At risk', statusVariant: 'risk', description: 'Cami was unsure if batch export is possible or how often MIRS wipes data. May not be recoverable, not just delayed.' },
+    { title: 'MIRS historical export', status: 'At risk', statusVariant: 'risk', description: 'Cami attempted to access MIRS bill-tracking data during the May 5 kickoff call and found very little data remaining. MIRS appears to wipe historical data periodically. This export is likely unrecoverable, not just delayed. Phase 1 does not depend on it — the mcpp_positions table starts empty. If a batch export becomes possible, a data import script will be added as a separate Phase 3 task.' },
     { title: 'Published vs. unpublished position', status: 'Not yet raised', statusVariant: 'pending', description: 'Surfaced on the kickoff call, missing from the written doc. Needs a public/private flag separate from the position itself.' },
+    { title: 'Position Values — 4-value vs. 8-value rubric', status: 'Awaiting Cami', statusVariant: 'pending', description: "Cami's written requirements doc lists 4 position values: Support / Oppose / Watching / Unimportant. Earlier design work used an 8-value rubric (strong_support, light_support, neutral, light_opposition, strong_opposition, not_applicable, watching, unimportant). These are inconsistent. The schema cannot be finalized until Cami confirms which set to use. Brian to resolve before BT-02 schema is deployed." },
   ];
 
   const ACTION_ITEMS = [
@@ -489,6 +510,10 @@
     { ownerClass: 'action-both', owner: 'Michael & Dan · Discuss at June 18 review', text: 'Decide on a fallback plan for cross-cycle linking if MIRS historical data is confirmed unrecoverable' },
     { ownerClass: 'action-pipe', owner: 'Brian · After June 18 review', text: 'Create Linear epic and break Phase 1 into tickets once scope is locked; update or retire stale PIP-216' },
     { ownerClass: 'action-pipe', owner: 'Dan · Pending Phase 1 lock', text: 'Assign technical owner for Supabase schema design' },
+    { ownerClass: 'action-pipe', owner: 'Brian · Pending · Blocks BT-02 schema deploy', text: 'Confirm position values with Cami — 4-value vs. 8-value rubric' },
+    { ownerClass: 'action-pipe', owner: 'Brian · Pending · Blocks notification architecture (Gap 4)', text: 'Confirm user roles and permissions with Cami — who gets edit access vs. read-only' },
+    { ownerClass: 'action-pipe', owner: 'Brian · Pending · Critical path for BT-04 and cross-cycle feature', text: 'Schedule meeting with Steve Frick and Isaiah (MCPP IT) — obtain Michigan Votes DB snapshot for hosting on Pipeline infra' },
+    { ownerClass: 'action-pipe', owner: 'Brian · Pending', text: "Confirm June 18 ingestion pipeline decision — was the Supabase ingestion pipeline greenlighted independent of Cami's other answers?" },
   ];
 
   const SECTIONS = [
@@ -536,12 +561,12 @@
       id: 'data-arch',
       icon: '🗂️',
       iconBg: 'var(--blue-lt)',
-      title: 'Data Architecture — Three Core + Three Supporting Record Types',
+      title: 'Data Architecture — Three Core + Four Supporting Record Types',
       pill: 'Schema',
       pillStyle: 'schema',
       bodyType: 'recordGrid',
       body: {
-        intro: 'Three record types carry the weight of the system. Three more support them but could be added incrementally without reworking the core.',
+        intro: 'Three record types carry the weight of the system. Four more support them but could be added incrementally without reworking the core.',
         records: RECORD_TYPES,
       },
     },
@@ -580,6 +605,36 @@
       body: { columns: ['Field', 'Description'], rows: POSITION_FIELDS },
     },
     {
+      id: 'testimony',
+      icon: '📋',
+      iconBg: 'var(--green-bg)',
+      title: 'Testimony Activity',
+      pill: 'Phase 1 — Necessary',
+      pillStyle: 'phase1kpi',
+      bodyType: 'fieldTable',
+      body: {
+        intro: "Cami's requirements doc lists testimony tracking as Necessary (not Beneficial). This is a distinct data record from the bill position.",
+        columns: ['Field', 'Description'],
+        rows: TESTIMONY_FIELDS,
+        implementationNote: 'Stored in a dedicated testimony_activity table (one row per bill). Powers a /feed/activity-report route with print-friendly CSS.',
+      },
+    },
+    {
+      id: 'stakeholders',
+      icon: '🤝',
+      iconBg: 'var(--gold-bg)',
+      title: 'Stakeholders',
+      pill: 'Phase 1 — Beneficial',
+      pillStyle: 'phase1',
+      bodyType: 'fieldTable',
+      body: {
+        intro: 'Cami requested the ability to track which organizations or individuals are in support or opposition of a bill. Phase 1 = manual entry. Phase 2 stretch = auto-scrape from committee meeting minutes.',
+        columns: ['Field', 'Description'],
+        rows: STAKEHOLDER_FIELDS,
+        implementationNote: 'Stored in bill_stakeholders table. Manual entry via the Bill Detail Slide-Over.',
+      },
+    },
+    {
       id: 'cross-cycle',
       icon: '🔗',
       iconBg: 'var(--green-bg)',
@@ -603,7 +658,8 @@
       bodyType: 'prose',
       body: {
         paragraphs: [
-          'Designate a policy director as lead on a bill, with automatic email notification on assignment. Government Affairs also receives notifications when a tracked bill (High, Low, or Watching) has a status change. Depends on resolving roles and permissions first.',
+          'Notification 1 — Director Assignment: Fires when a policy director is designated as lead on a bill via upsert-mcpp-position. Email sent immediately to the assigned director with bill summary, MCPP position, priority, and direct link. Depends on user roles/permissions being resolved (Gap 4).',
+          "Notification 2 — GA Status Change Alert (NEW — from Cami's requirements doc): Fires when a tracked bill's legislative status changes. Condition: bill must have an MCPP position with priority of High, Medium, or Watching. Recipients: GA staff (Cami, Adam). Content: bill identifier, what status changed from/to, link to bill detail. Timing: on next scraper run after change detected. This is listed as Necessary in Cami's requirements doc — must ship in Phase 1.",
         ],
       },
     },
@@ -622,7 +678,7 @@
       icon: '❓',
       iconBg: 'var(--red-bg)',
       title: 'Open Questions',
-      pill: '7 Gaps',
+      pill: '8 Gaps',
       pillStyle: 'discovery',
       bodyType: 'questions',
       body: { items: OPEN_QUESTIONS },
@@ -668,6 +724,18 @@
     const header = columns.map(col => `<th scope="col">${escapeHtml(col)}</th>`).join('');
     const body = rows.map(renderFieldRow).join('');
     return `<table><thead><tr>${header}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+
+  function renderFieldTableSection(body) {
+    const intro = body.intro ? `<p class="section-intro">${escapeHtml(body.intro)}</p>` : '';
+    const table = renderFieldTable(body.columns, body.rows);
+    const note = body.implementationNote ? `
+      <div class="callout callout-blue">
+        <span class="callout-icon" aria-hidden="true">⚙️</span>
+        <p><strong>Implementation note:</strong> ${escapeHtml(body.implementationNote)}</p>
+      </div>
+    ` : '';
+    return intro + table + note;
   }
 
   function renderOverview(body) {
@@ -768,7 +836,10 @@
       case 'overview': return renderOverview(section.body);
       case 'recordGrid': return renderRecordGrid(section.body);
       case 'prose': return renderProse(section.body);
-      case 'fieldTable': return renderFieldTable(section.body.columns, section.body.rows);
+      case 'fieldTable':
+        return section.body.intro || section.body.implementationNote
+          ? renderFieldTableSection(section.body)
+          : renderFieldTable(section.body.columns, section.body.rows);
       case 'crossCycle': return renderCrossCycle(section.body);
       case 'roadmap': return renderRoadmap(section.body);
       case 'questions': return renderQuestions(section.body);
